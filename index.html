@@ -172,7 +172,7 @@ const firebaseConfig = {
   measurementId: "G-G3KRG9DN75"
 };
 
-const VERSION_APP = '1.3';
+const VERSION_APP = '1.4';
 const PERSONAS = {
   ivan: { nombre: 'Iván', color: 'var(--ivan)' },
   jen:  { nombre: 'Jen',  color: 'var(--jen)' }
@@ -373,6 +373,11 @@ function escucharDatos() {
 const responsableEfectivo = t => t.responsable === 'alternar' ? (t.turno || 'ivan') : t.responsable;
 const esDe = (t, p) => { const r = responsableEfectivo(t); return r === p || r === 'ambos'; };
 const categoria = id => S.categorias.find(c => c.id === id) || { nombre: 'Sin categoría', color: '#9AA7AB' };
+const hizo = (r, p) => r.hechaPor === p || r.hechaPor === 'ambos';
+const nombreQuien = k => k === 'ambos' ? 'Iván y Jen' : (PERSONAS[k]?.nombre || '?');
+const opcionesQuien = sel => [...Object.entries(PERSONAS).map(([k, p]) => [k, p.nombre]), ['ambos', 'Los dos']]
+  .map(([k, n]) => `<option value="${k}"${k === sel ? ' selected' : ''}>${n}</option>`).join('');
+const siguienteTurno = (actual, quien) => quien === 'ambos' ? (actual || 'ivan') : (quien === 'ivan' ? 'jen' : 'ivan');
 const activas = () => S.tareas.filter(t => t.activa !== false && t.proxima);
 const hechasHoy = () => S.registro.filter(r => r.fecha === hoy());
 
@@ -382,7 +387,7 @@ function pasaFiltro(t, f) {
   return true;
 }
 function registroPasaFiltro(r, f) {
-  if (f.persona && f.persona !== 'todos' && r.hechaPor !== f.persona) return false;
+  if (f.persona && f.persona !== 'todos' && !hizo(r, f.persona)) return false;
   if (f.categoria && f.categoria !== 'todas' && r.categoriaId !== f.categoria) return false;
   return true;
 }
@@ -422,7 +427,7 @@ function completar(id, boton, fecha, quien) {
   const cambios = {};
   if (!t.frecuencia || t.frecuencia.tipo === 'una') cambios.activa = false;
   else cambios.proxima = paso(f, t.frecuencia, 1); // la siguiente cuenta desde el día en que se hace
-  if (t.responsable === 'alternar') cambios.turno = hechaPor === 'ivan' ? 'jen' : 'ivan';
+  if (t.responsable === 'alternar') cambios.turno = siguienteTurno(t.turno, hechaPor);
   lote.update(FB.doc(db, 'tareas', id), cambios);
   lote.commit().catch(alError);
   avisar(f === hoy() ? `${t.nombre}: hecha` : `${t.nombre}: hecha el ${fechaCorta(f)}`, 'Deshacer', () => {
@@ -465,11 +470,11 @@ function filaTarea(t, fecha, { siguiente = true, mostrarFecha = false } = {}) {
     </div></div>`;
 }
 function filaHecha(r) {
-  const c = categoria(r.categoriaId), p = PERSONAS[r.hechaPor];
+  const c = categoria(r.categoriaId);
   return `<div class="fila hecha"><span class="check lleno" aria-hidden="true">${I.ok}</span>
     <div class="info" data-registro="${r.id}"><div class="nombre">${esc(r.nombre)}</div>
     <div class="meta"><span class="cat" style="--c:${esc(c.color)}">${esc(c.nombre)}</span>
-    <span>Hecha por ${p ? p.nombre : '?'}${r.prevista && r.prevista < r.fecha ? `, tocaba ${fechaCorta(r.prevista)}` : ''}</span></div></div></div>`;
+    <span>Hecha por ${nombreQuien(r.hechaPor)}${r.prevista && r.prevista < r.fecha ? `, tocaba ${fechaCorta(r.prevista)}` : ''}</span></div></div></div>`;
 }
 const listaHTML = (items, vacio) => items.length ? `<div class="lista">${items.join('')}</div>` : `<div class="vacio">${vacio}</div>`;
 const opcionesPersona = sel => `<option value="todos"${sel === 'todos' ? ' selected' : ''}>Todos</option>` +
@@ -484,7 +489,7 @@ function vistaHoy() {
   const pend = activas().filter(t => t.proxima <= h && pasaFiltro(t, filtro)).sort((a, b) => a.proxima.localeCompare(b.proxima));
   const atrasadas = pend.filter(t => t.proxima < h);
   const deHoy = pend.filter(t => t.proxima === h);
-  const hechas = hechasHoy().filter(r => S.hoySolo !== 'mias' || r.hechaPor === S.yo);
+  const hechas = hechasHoy().filter(r => S.hoySolo !== 'mias' || hizo(r, S.yo));
   const total = pend.length + hechas.length;
   const pct = total ? Math.round(hechas.length / total * 100) : 0;
   const d = new Date();
@@ -502,23 +507,6 @@ function vistaHoy() {
     <h2>Para hoy <span class="n">${deHoy.length}</span></h2>
     ${listaHTML(deHoy.map(t => filaTarea(t, t.proxima)), 'Nada pendiente para hoy.')}
     ${hechas.length ? `<h2>Hechas hoy <span class="n">${hechas.length}</span></h2>${listaHTML(hechas.map(filaHecha), '')}` : ''}`;
-}
-
-function vistaMias() {
-  const h = hoy(), en7 = sumarDias(h, 7);
-  const mias = activas().filter(t => esDe(t, S.yo)).sort((a, b) => a.proxima.localeCompare(b.proxima));
-  const ahora = mias.filter(t => t.proxima <= h);
-  const semana = mias.filter(t => t.proxima > h && t.proxima <= en7);
-  const luego = mias.filter(t => t.proxima > en7);
-  const p = PERSONAS[S.yo];
-  return `<h2 style="font-size:1.6rem;font-weight:900;margin-top:10px">Tareas de ${p ? p.nombre : ''}</h2>
-    <p style="color:var(--tinta-suave);margin:0">Incluye las tuyas, las de ambos y las alternas cuando te toca.</p>
-    <h2>Pendientes ahora <span class="n">${ahora.length}</span></h2>
-    ${listaHTML(ahora.map(t => filaTarea(t, t.proxima, { mostrarFecha: true })), 'No tienes nada pendiente.')}
-    <h2>Próximos 7 días <span class="n">${semana.length}</span></h2>
-    ${listaHTML(semana.map(t => filaTarea(t, t.proxima, { mostrarFecha: true })), 'Semana despejada.')}
-    <h2>Más adelante <span class="n">${luego.length}</span></h2>
-    ${listaHTML(luego.map(t => filaTarea(t, t.proxima, { mostrarFecha: true })), 'Nada más programado.')}`;
 }
 
 function itemsDia(fecha, mapa, filtroReg) {
@@ -610,18 +598,19 @@ function vistaHistorial() {
   }
   html += '</div>';
   const cuenta = p => regs.filter(r => r.hechaPor === p).length;
-  html += `<p style="color:var(--tinta-suave);font-size:.85rem;margin-top:18px">Se muestran los últimos ${S.registro.length} registros. Iván: ${cuenta('ivan')}, Jen: ${cuenta('jen')}.</p>`;
+  const juntos = regs.filter(r => r.hechaPor === 'ambos').length;
+  html += `<p style="color:var(--tinta-suave);font-size:.85rem;margin-top:18px">Se muestran los últimos ${S.registro.length} registros. Iván: ${cuenta('ivan')}, Jen: ${cuenta('jen')}, juntos: ${juntos}.</p>`;
   return html;
 }
 
 /* ---------- Pintado general ---------- */
 const PESTANAS = [
-  ['hoy', 'Hoy', I.hoy], ['calendario', 'Calendario', I.cal], ['mias', 'Mis tareas', I.yo],
+  ['hoy', 'Hoy', I.hoy], ['calendario', 'Calendario', I.cal],
   ['tareas', 'Tareas', I.lista], ['historial', 'Historial', I.hist]
 ];
 function pintar() {
   if (!S.usuario || !S.yo) return;
-  const vistas = { hoy: vistaHoy, calendario: vistaCalendario, mias: vistaMias, tareas: vistaTareas, historial: vistaHistorial };
+  const vistas = { hoy: vistaHoy, calendario: vistaCalendario, tareas: vistaTareas, historial: vistaHistorial };
   const p = PERSONAS[S.yo];
   const scroll = window.scrollY;
   app.innerHTML = `<header class="top"><div class="marca">${I.tejado}HomePlan<span class="ver">v${VERSION_APP}</span></div>
@@ -638,7 +627,10 @@ app.addEventListener('click', e => {
   const el = e.target.closest('button, [data-editar], [data-registro]');
   if (!el) return;
   const d = el.dataset;
-  if (d.completar) return completar(d.completar, el);
+  if (d.completar) {
+    const t = S.tareas.find(x => x.id === d.completar);
+    return t && t.responsable === 'ambos' ? elegirQuien(t, el) : completar(d.completar, el);
+  }
   if (d.editar) return formularioTarea(S.tareas.find(t => t.id === d.editar));
   if (d.registro) return formularioRegistro(S.registro.find(r => r.id === d.registro));
   if (d.vista) { S.vista = d.vista; window.scrollTo(0, 0); return pintar(); }
@@ -696,7 +688,7 @@ function formularioTarea(t) {
     ${!nueva && v.activa !== false ? `<div class="campo" style="background:var(--menta-suave);border-radius:var(--radio);padding:12px">
       <span class="lbl">¿Ya está hecha y se olvidó marcar?</span>
       <div class="fila2"><input type="date" id="h-fecha" value="${hoy()}" max="${hoy()}" aria-label="Día en que se hizo">
-        <select id="h-quien" aria-label="Quién la hizo">${Object.entries(PERSONAS).map(([k, p]) => `<option value="${k}"${k === S.yo ? ' selected' : ''}>${p.nombre}</option>`).join('')}</select></div>
+        <select id="h-quien" aria-label="Quién la hizo">${opcionesQuien(v.responsable === 'ambos' ? 'ambos' : S.yo)}</select></div>
       <button class="btn ancho" id="h-marcar" style="margin-top:8px;background:var(--menta);color:#fff">Marcar como hecha ese día</button>
       <p style="margin:6px 0 0;color:var(--tinta-suave);font-size:.85rem">La siguiente vez se calcula desde el día que elijas.</p></div>` : ''}
     ${!nueva && v.activa === false ? `<p style="color:var(--tinta-suave)">Esta tarea de una sola vez ya está hecha. Al guardar vuelve a quedar pendiente.</p>` : ''}
@@ -756,6 +748,17 @@ function esUltimoRegistro(r) {
     (x.fecha > r.fecha || (x.fecha === r.fecha && x._ts > r._ts)));
 }
 
+function elegirQuien(t, boton) {
+  abrirHoja(`<h3>${esc(t.nombre)}</h3>
+    <p style="margin:0 0 14px;color:var(--tinta-suave)">¿Quién la ha hecho?</p>
+    <div class="acciones" style="flex-direction:column">
+      <button class="btn" data-q="${S.yo}" style="background:${PERSONAS[S.yo].color};color:#fff">Yo (${PERSONAS[S.yo].nombre})</button>
+      <button class="btn" data-q="ambos" style="background:var(--menta);color:#fff">Los dos</button>
+      <button class="btn sec" data-cerrar>Cancelar</button>
+    </div>`);
+  sheet.querySelectorAll('[data-q]').forEach(b => b.onclick = () => { cerrarHoja(); completar(t.id, boton, null, b.dataset.q); });
+}
+
 function formularioRegistro(r) {
   if (!r) return;
   const t = S.tareas.find(x => x.id === r.tareaId);
@@ -763,7 +766,7 @@ function formularioRegistro(r) {
   abrirHoja(`<h3>${esc(r.nombre)}</h3>
     <p style="margin:0 0 14px;color:var(--tinta-suave)">Registro de tarea hecha${r.prevista ? `. Tocaba el ${fechaCorta(r.prevista)}` : ''}.</p>
     <div class="campo"><label for="r-fecha">Día en que se hizo</label><input type="date" id="r-fecha" value="${esc(r.fecha)}" max="${hoy()}"></div>
-    <div class="campo"><label for="r-quien">Quién la hizo</label><select id="r-quien">${Object.entries(PERSONAS).map(([k, p]) => `<option value="${k}"${k === r.hechaPor ? ' selected' : ''}>${p.nombre}</option>`).join('')}</select></div>
+    <div class="campo"><label for="r-quien">Quién la hizo</label><select id="r-quien">${opcionesQuien(r.hechaPor)}</select></div>
     ${ultimo ? `<p style="color:var(--tinta-suave);font-size:.85rem">Es la última vez que se hizo esta tarea: si cambias el día, la próxima fecha se recalcula; si eliminas el registro, la tarea vuelve a quedar pendiente.</p>` : ''}
     <div class="acciones"><button class="btn sec" data-cerrar>Cancelar</button><button class="btn" id="r-guardar">Guardar</button></div>
     <button class="btn peligro ancho" id="r-borrar" style="margin-top:10px">Eliminar registro</button>
@@ -778,7 +781,7 @@ function formularioRegistro(r) {
     if (ultimo) {
       const cambios = {};
       if (t.frecuencia && t.frecuencia.tipo !== 'una' && fecha !== r.fecha) cambios.proxima = paso(fecha, t.frecuencia, 1);
-      if (t.responsable === 'alternar' && quien !== r.hechaPor) cambios.turno = quien === 'ivan' ? 'jen' : 'ivan';
+      if (t.responsable === 'alternar' && quien !== r.hechaPor) cambios.turno = siguienteTurno(t.turno, quien);
       if (Object.keys(cambios).length) lote.update(FB.doc(db, 'tareas', t.id), cambios);
     }
     lote.commit().catch(alError);
@@ -793,7 +796,7 @@ function formularioRegistro(r) {
     if (ultimo) {
       const volver = { activa: true };
       if (r.prevista) volver.proxima = r.prevista;
-      if (t.responsable === 'alternar') volver.turno = r.hechaPor;
+      if (t.responsable === 'alternar' && r.hechaPor !== 'ambos') volver.turno = r.hechaPor;
       lote.update(FB.doc(db, 'tareas', t.id), volver);
     }
     lote.commit().catch(alError);
