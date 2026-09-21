@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#17303A">
 <title>HomePlan</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icono-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="HomePlan">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -781,6 +786,10 @@ function menuCuenta() {
 let ultimoDia = hoy();
 setInterval(() => { if (hoy() !== ultimoDia) { ultimoDia = hoy(); pintar(); } }, 60000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden && hoy() !== ultimoDia) { ultimoDia = hoy(); pintar(); } });
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(e => console.warn('Service worker no registrado', e)));
+}
 
 iniciar();
 </script>
