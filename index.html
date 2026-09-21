@@ -45,6 +45,7 @@ button{cursor:pointer}
 header.top{display:flex;align-items:center;justify-content:space-between;padding:14px 0 6px}
 .marca{font-weight:900;font-size:1.25rem;letter-spacing:-.02em;display:flex;align-items:center;gap:8px}
 .marca .tejado{width:26px;height:26px}
+.ver{font-size:.75rem;font-weight:800;color:var(--tinta-suave);background:var(--azulejo);border-radius:999px;padding:2px 8px;margin-left:2px}
 .yo{border:0;background:var(--azulejo);border-radius:999px;padding:6px 12px;font-weight:700;font-size:.9rem}
 nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--superficie);border-top:1px solid var(--linea);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom,0px);z-index:10}
 nav.tabs .in{display:flex;width:100%;max-width:640px}
@@ -83,8 +84,6 @@ h2 .n{color:var(--tinta-suave);font-weight:700}
 .cat{display:inline-flex;align-items:center;gap:5px;font-weight:700;color:var(--tinta)}
 .cat::before{content:"";width:10px;height:10px;border-radius:3px;background:var(--c)}
 .persona{font-weight:800;border-radius:999px;padding:1px 8px;font-size:.78rem;color:#fff;background:var(--p)}
-.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
-.chip{font-size:.76rem;font-weight:700;background:var(--papel);border:1px solid var(--linea);border-radius:999px;padding:1px 8px}
 .rojo{color:var(--alerta);font-weight:800}
 
 /* Controles */
@@ -173,7 +172,7 @@ const firebaseConfig = {
   measurementId: "G-G3KRG9DN75"
 };
 
-const VERSION_APP = '1.0';
+const VERSION_APP = '1.2';
 const PERSONAS = {
   ivan: { nombre: 'Iván', color: 'var(--ivan)' },
   jen:  { nombre: 'Jen',  color: 'var(--jen)' }
@@ -250,7 +249,7 @@ const S = {
   usuario: null, yo: null, tareas: [], categorias: [], registro: [],
   vista: 'hoy', hoySolo: 'todas',
   cal: { modo: 'semana', fecha: hoy(), persona: 'todos', categoria: 'todas' },
-  lista: { persona: 'todos', categoria: 'todas', etiqueta: 'todas' },
+  lista: { persona: 'todos', categoria: 'todas' },
   hist: { persona: 'todos' },
   error: null
 };
@@ -380,7 +379,6 @@ const hechasHoy = () => S.registro.filter(r => r.fecha === hoy());
 function pasaFiltro(t, f) {
   if (f.persona && f.persona !== 'todos' && !esDe(t, f.persona)) return false;
   if (f.categoria && f.categoria !== 'todas' && t.categoriaId !== f.categoria) return false;
-  if (f.etiqueta && f.etiqueta !== 'todas' && !(t.etiquetas || []).includes(f.etiqueta)) return false;
   return true;
 }
 function registroPasaFiltro(r, f) {
@@ -408,25 +406,26 @@ function ocurrencias(desde, hasta, filtro) {
   return mapa;
 }
 
-function completar(id, boton) {
+function completar(id, boton, fecha, quien) {
   const t = S.tareas.find(x => x.id === id);
   if (!t) return;
   if (boton) { boton.classList.add('lleno', 'pop'); }
-  const f = hoy();
+  const f = fecha || hoy();
+  const hechaPor = quien || S.yo;
   const lote = FB.writeBatch(db);
   const refReg = FB.doc(FB.collection(db, 'registro'));
   lote.set(refReg, {
-    tareaId: id, nombre: t.nombre, categoriaId: t.categoriaId || null, etiquetas: t.etiquetas || [],
-    hechaPor: S.yo, prevista: t.proxima, fecha: f, ts: FB.serverTimestamp()
+    tareaId: id, nombre: t.nombre, categoriaId: t.categoriaId || null,
+    hechaPor, prevista: t.proxima, fecha: f, ts: FB.serverTimestamp()
   });
   const antes = { proxima: t.proxima, activa: t.activa !== false, turno: t.turno || null };
   const cambios = {};
   if (!t.frecuencia || t.frecuencia.tipo === 'una') cambios.activa = false;
   else cambios.proxima = paso(f, t.frecuencia, 1); // la siguiente cuenta desde el día en que se hace
-  if (t.responsable === 'alternar') cambios.turno = S.yo === 'ivan' ? 'jen' : 'ivan';
+  if (t.responsable === 'alternar') cambios.turno = hechaPor === 'ivan' ? 'jen' : 'ivan';
   lote.update(FB.doc(db, 'tareas', id), cambios);
   lote.commit().catch(alError);
-  avisar(`${t.nombre}: hecha`, 'Deshacer', () => {
+  avisar(f === hoy() ? `${t.nombre}: hecha` : `${t.nombre}: hecha el ${fechaCorta(f)}`, 'Deshacer', () => {
     const l = FB.writeBatch(db);
     l.delete(refReg);
     l.update(FB.doc(db, 'tareas', id), antes);
@@ -455,7 +454,6 @@ function etiquetaPersona(t) {
 function filaTarea(t, fecha, { siguiente = true, mostrarFecha = false } = {}) {
   const c = categoria(t.categoriaId);
   const atrasada = siguiente && fecha < hoy();
-  const chips = (t.etiquetas || []).length ? `<div class="chips">${t.etiquetas.map(e => `<span class="chip">${esc(e)}</span>`).join('')}</div>` : '';
   const check = siguiente
     ? `<button class="check" data-completar="${t.id}" aria-label="Marcar ${esc(t.nombre)} como hecha">${I.ok}</button>`
     : `<span class="check futuro" aria-hidden="true"></span>`;
@@ -463,7 +461,7 @@ function filaTarea(t, fecha, { siguiente = true, mostrarFecha = false } = {}) {
     <div class="info" data-editar="${t.id}">
       <div class="nombre">${esc(t.nombre)}</div>
       <div class="meta"><span class="cat" style="--c:${esc(c.color)}">${esc(c.nombre)}</span>${etiquetaPersona(t)}<span>${textoFrecuencia(t.frecuencia)}</span>
-      ${mostrarFecha ? `<span class="${atrasada ? 'rojo' : ''}">${atrasada ? 'Tocaba ' : ''}${fechaRelativa(fecha)}</span>` : ''}</div>${chips}
+      ${mostrarFecha ? `<span class="${atrasada ? 'rojo' : ''}">${atrasada ? 'Tocaba ' : ''}${fechaRelativa(fecha)}</span>` : ''}</div>
     </div></div>`;
 }
 function filaHecha(r) {
@@ -588,13 +586,11 @@ function vistaCalendario() {
 
 function vistaTareas() {
   const f = S.lista;
-  const etiquetas = [...new Set(S.tareas.flatMap(t => t.etiquetas || []))].sort((a, b) => a.localeCompare(b, 'es'));
   const lista = S.tareas.filter(t => pasaFiltro(t, f)).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
   const act = lista.filter(t => t.activa !== false), fin = lista.filter(t => t.activa === false);
   return `<div class="filtros" style="margin-top:12px">
       <select data-listafiltro="persona" aria-label="Filtrar por persona">${opcionesPersona(f.persona)}</select>
       <select data-listafiltro="categoria" aria-label="Filtrar por categoría">${opcionesCategoria(f.categoria)}</select>
-      ${etiquetas.length ? `<select data-listafiltro="etiqueta" aria-label="Filtrar por etiqueta"><option value="todas">Todas las etiquetas</option>${etiquetas.map(e => `<option value="${esc(e)}"${f.etiqueta === e ? ' selected' : ''}>${esc(e)}</option>`).join('')}</select>` : ''}
     </div>
     <button class="btn sec ancho" data-categorias>Gestionar categorías</button>
     <h2>Activas <span class="n">${act.length}</span></h2>
@@ -628,7 +624,7 @@ function pintar() {
   const vistas = { hoy: vistaHoy, calendario: vistaCalendario, mias: vistaMias, tareas: vistaTareas, historial: vistaHistorial };
   const p = PERSONAS[S.yo];
   const scroll = window.scrollY;
-  app.innerHTML = `<header class="top"><div class="marca">${I.tejado}HomePlan</div>
+  app.innerHTML = `<header class="top"><div class="marca">${I.tejado}HomePlan<span class="ver">v${VERSION_APP}</span></div>
       <button class="yo" data-cuenta style="color:${p.color}">${p.nombre}</button></header>
     <main>${vistas[S.vista]()}</main>
     <button class="fab" data-nueva aria-label="Nueva tarea">${I.mas}</button>
@@ -678,14 +674,13 @@ sheet.addEventListener('click', e => { if (e.target === sheet || e.target.closes
 
 function formularioTarea(t) {
   const nueva = !t;
-  const v = t || { nombre: '', categoriaId: S.categorias[0]?.id || '', etiquetas: [], responsable: S.yo, turno: S.yo,
+  const v = t || { nombre: '', categoriaId: S.categorias[0]?.id || '', responsable: S.yo, turno: S.yo,
     frecuencia: { tipo: 'semanas', cada: 1 }, proxima: hoy(), notas: '', activa: true };
   const fr = v.frecuencia || { tipo: 'una', cada: 1 };
   const resp = [['ivan', 'Iván'], ['jen', 'Jen'], ['ambos', 'Ambos'], ['alternar', 'Alternar']];
   abrirHoja(`<h3>${nueva ? 'Nueva tarea' : 'Editar tarea'}</h3>
     <div class="campo"><label for="f-nombre">Nombre</label><input type="text" id="f-nombre" value="${esc(v.nombre)}" placeholder="Limpiar ventanas" maxlength="80"></div>
     <div class="campo"><label for="f-cat">Categoría</label><select id="f-cat">${S.categorias.map(c => `<option value="${c.id}"${v.categoriaId === c.id ? ' selected' : ''}>${esc(c.nombre)}</option>`).join('')}</select></div>
-    <div class="campo"><label for="f-etq">Etiquetas</label><input type="text" id="f-etq" value="${esc((v.etiquetas || []).join(', '))}" placeholder="Separadas por comas: rápida, fin de semana"></div>
     <div class="campo"><span class="lbl">Quién la hace</span>
       <div class="seg" id="f-resp">${resp.map(([k, n]) => `<button type="button" data-r="${k}" aria-pressed="${v.responsable === k}">${n}</button>`).join('')}</div></div>
     <div class="campo${v.responsable === 'alternar' ? '' : ' hidden'}" id="f-turno-c"><label for="f-turno">Le toca ahora a</label>
@@ -697,6 +692,12 @@ function formularioTarea(t) {
       <p id="f-freq-txt" style="margin:6px 0 0;color:var(--tinta-suave);font-size:.88rem">${textoFrecuencia(fr)}</p></div>
     <div class="campo"><label for="f-fecha">${nueva ? 'Primera vez' : 'Próxima vez'}</label><input type="date" id="f-fecha" value="${esc(v.proxima || hoy())}"></div>
     <div class="campo"><label for="f-notas">Notas</label><textarea id="f-notas" placeholder="Opcional">${esc(v.notas || '')}</textarea></div>
+    ${!nueva && v.activa !== false ? `<div class="campo" style="background:var(--menta-suave);border-radius:var(--radio);padding:12px">
+      <span class="lbl">¿Ya está hecha y se olvidó marcar?</span>
+      <div class="fila2"><input type="date" id="h-fecha" value="${hoy()}" max="${hoy()}" aria-label="Día en que se hizo">
+        <select id="h-quien" aria-label="Quién la hizo">${Object.entries(PERSONAS).map(([k, p]) => `<option value="${k}"${k === S.yo ? ' selected' : ''}>${p.nombre}</option>`).join('')}</select></div>
+      <button class="btn ancho" id="h-marcar" style="margin-top:8px;background:var(--menta);color:#fff">Marcar como hecha ese día</button>
+      <p style="margin:6px 0 0;color:var(--tinta-suave);font-size:.85rem">La siguiente vez se calcula desde el día que elijas.</p></div>` : ''}
     ${!nueva && v.activa === false ? `<p style="color:var(--tinta-suave)">Esta tarea de una sola vez ya está hecha. Al guardar vuelve a quedar pendiente.</p>` : ''}
     <div class="acciones"><button class="btn sec" data-cerrar>Cancelar</button><button class="btn" id="f-guardar">Guardar</button></div>
     ${nueva ? '' : `<button class="btn peligro ancho" id="f-borrar" style="margin-top:10px">Borrar tarea</button>`}`);
@@ -722,7 +723,6 @@ function formularioTarea(t) {
     const fecha = $('#f-fecha').value || hoy();
     const datos = {
       nombre, categoriaId: $('#f-cat').value || null,
-      etiquetas: [...new Set($('#f-etq').value.split(',').map(s => s.trim()).filter(Boolean))],
       responsable, turno: responsable === 'alternar' ? $('#f-turno').value : null,
       frecuencia: { tipo: $('#f-tipo').value, cada: Math.max(1, parseInt($('#f-cada').value, 10) || 1) },
       proxima: fecha, notas: $('#f-notas').value.trim(), activa: true
@@ -733,6 +733,12 @@ function formularioTarea(t) {
     op.catch(alError);
     cerrarHoja();
     avisar(nueva ? 'Tarea creada' : 'Cambios guardados');
+  };
+  if (!nueva && v.activa !== false) $('#h-marcar').onclick = () => {
+    const fecha = $('#h-fecha').value;
+    if (!fecha || fecha > hoy()) { $('#h-fecha').focus(); return avisar('Elige hoy o un día anterior'); }
+    cerrarHoja();
+    completar(t.id, null, fecha, $('#h-quien').value);
   };
   if (!nueva) $('#f-borrar').onclick = () => {
     if (!confirm(`¿Borrar "${t.nombre}"? El historial de veces que se hizo se conserva.`)) return;
