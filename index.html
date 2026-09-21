@@ -172,7 +172,7 @@ const firebaseConfig = {
   measurementId: "G-G3KRG9DN75"
 };
 
-const VERSION_APP = '1.2';
+const VERSION_APP = '1.3';
 const PERSONAS = {
   ivan: { nombre: 'Iván', color: 'var(--ivan)' },
   jen:  { nombre: 'Jen',  color: 'var(--jen)' }
@@ -467,7 +467,7 @@ function filaTarea(t, fecha, { siguiente = true, mostrarFecha = false } = {}) {
 function filaHecha(r) {
   const c = categoria(r.categoriaId), p = PERSONAS[r.hechaPor];
   return `<div class="fila hecha"><span class="check lleno" aria-hidden="true">${I.ok}</span>
-    <div class="info"><div class="nombre">${esc(r.nombre)}</div>
+    <div class="info" data-registro="${r.id}"><div class="nombre">${esc(r.nombre)}</div>
     <div class="meta"><span class="cat" style="--c:${esc(c.color)}">${esc(c.nombre)}</span>
     <span>Hecha por ${p ? p.nombre : '?'}${r.prevista && r.prevista < r.fecha ? `, tocaba ${fechaCorta(r.prevista)}` : ''}</span></div></div></div>`;
 }
@@ -635,11 +635,12 @@ function pintar() {
 
 /* ---------- Eventos ---------- */
 app.addEventListener('click', e => {
-  const el = e.target.closest('button, [data-editar]');
+  const el = e.target.closest('button, [data-editar], [data-registro]');
   if (!el) return;
   const d = el.dataset;
   if (d.completar) return completar(d.completar, el);
   if (d.editar) return formularioTarea(S.tareas.find(t => t.id === d.editar));
+  if (d.registro) return formularioRegistro(S.registro.find(r => r.id === d.registro));
   if (d.vista) { S.vista = d.vista; window.scrollTo(0, 0); return pintar(); }
   if (d.hoy) { S.hoySolo = d.hoy; return pintar(); }
   if ('nueva' in d) return formularioTarea(null);
@@ -747,6 +748,60 @@ function formularioTarea(t) {
     avisar('Tarea borrada');
   };
   if (nueva) setTimeout(() => $('#f-nombre').focus(), 50);
+}
+
+/* Es la última vez que se hizo esa tarea (según los registros cargados) */
+function esUltimoRegistro(r) {
+  return !S.registro.some(x => x.tareaId === r.tareaId && x.id !== r.id &&
+    (x.fecha > r.fecha || (x.fecha === r.fecha && x._ts > r._ts)));
+}
+
+function formularioRegistro(r) {
+  if (!r) return;
+  const t = S.tareas.find(x => x.id === r.tareaId);
+  const ultimo = t && esUltimoRegistro(r);
+  abrirHoja(`<h3>${esc(r.nombre)}</h3>
+    <p style="margin:0 0 14px;color:var(--tinta-suave)">Registro de tarea hecha${r.prevista ? `. Tocaba el ${fechaCorta(r.prevista)}` : ''}.</p>
+    <div class="campo"><label for="r-fecha">Día en que se hizo</label><input type="date" id="r-fecha" value="${esc(r.fecha)}" max="${hoy()}"></div>
+    <div class="campo"><label for="r-quien">Quién la hizo</label><select id="r-quien">${Object.entries(PERSONAS).map(([k, p]) => `<option value="${k}"${k === r.hechaPor ? ' selected' : ''}>${p.nombre}</option>`).join('')}</select></div>
+    ${ultimo ? `<p style="color:var(--tinta-suave);font-size:.85rem">Es la última vez que se hizo esta tarea: si cambias el día, la próxima fecha se recalcula; si eliminas el registro, la tarea vuelve a quedar pendiente.</p>` : ''}
+    <div class="acciones"><button class="btn sec" data-cerrar>Cancelar</button><button class="btn" id="r-guardar">Guardar</button></div>
+    <button class="btn peligro ancho" id="r-borrar" style="margin-top:10px">Eliminar registro</button>
+    ${t ? `<button class="btn sec ancho" id="r-tarea" style="margin-top:10px">Editar la tarea</button>` : '<p style="color:var(--tinta-suave);font-size:.85rem;margin-top:10px">La tarea original ya no existe.</p>'}`);
+  const $ = q => sheet.querySelector(q);
+
+  $('#r-guardar').onclick = () => {
+    const fecha = $('#r-fecha').value, quien = $('#r-quien').value;
+    if (!fecha || fecha > hoy()) { $('#r-fecha').focus(); return avisar('Elige hoy o un día anterior'); }
+    const lote = FB.writeBatch(db);
+    lote.update(FB.doc(db, 'registro', r.id), { fecha, hechaPor: quien });
+    if (ultimo) {
+      const cambios = {};
+      if (t.frecuencia && t.frecuencia.tipo !== 'una' && fecha !== r.fecha) cambios.proxima = paso(fecha, t.frecuencia, 1);
+      if (t.responsable === 'alternar' && quien !== r.hechaPor) cambios.turno = quien === 'ivan' ? 'jen' : 'ivan';
+      if (Object.keys(cambios).length) lote.update(FB.doc(db, 'tareas', t.id), cambios);
+    }
+    lote.commit().catch(alError);
+    cerrarHoja();
+    avisar('Registro actualizado');
+  };
+
+  $('#r-borrar').onclick = () => {
+    if (!confirm(ultimo ? 'Se eliminará el registro y la tarea volverá a quedar pendiente. ¿Seguir?' : '¿Eliminar este registro del historial?')) return;
+    const lote = FB.writeBatch(db);
+    lote.delete(FB.doc(db, 'registro', r.id));
+    if (ultimo) {
+      const volver = { activa: true };
+      if (r.prevista) volver.proxima = r.prevista;
+      if (t.responsable === 'alternar') volver.turno = r.hechaPor;
+      lote.update(FB.doc(db, 'tareas', t.id), volver);
+    }
+    lote.commit().catch(alError);
+    cerrarHoja();
+    avisar('Registro eliminado');
+  };
+
+  if (t) $('#r-tarea').onclick = () => formularioTarea(t);
 }
 
 function formularioCategorias() {
