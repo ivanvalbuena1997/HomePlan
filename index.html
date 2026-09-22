@@ -82,7 +82,7 @@ h2 .n{color:var(--tinta-suave);font-weight:700}
 .nombre{font-weight:800}
 .meta{display:flex;flex-wrap:wrap;gap:6px 10px;font-size:.84rem;color:var(--tinta-suave);margin-top:3px;align-items:center}
 .cat{display:inline-flex;align-items:center;gap:5px;font-weight:700;color:var(--tinta)}
-.cat::before{content:"";width:10px;height:10px;border-radius:3px;background:var(--c)}
+.cat::before{content:"";width:11px;height:11px;border-radius:3px;background:var(--c);box-shadow:inset 0 0 0 1px rgba(23,48,58,.12)}
 .persona{font-weight:800;border-radius:999px;padding:1px 8px;font-size:.78rem;color:#fff;background:var(--p)}
 .rojo{color:var(--alerta);font-weight:800}
 
@@ -172,17 +172,17 @@ const firebaseConfig = {
   measurementId: "G-G3KRG9DN75"
 };
 
-const VERSION_APP = '1.4';
+const VERSION_APP = '1.5';
 const PERSONAS = {
   ivan: { nombre: 'Iván', color: 'var(--ivan)' },
   jen:  { nombre: 'Jen',  color: 'var(--jen)' }
 };
 const CATEGORIAS_INICIALES = [
-  { id: 'casa',    nombre: 'Casa',    color: '#2E9E6B' },
-  { id: 'cocina',  nombre: 'Cocina',  color: '#E8912D' },
-  { id: 'bano',    nombre: 'Baño',    color: '#2FA3C4' },
-  { id: 'ropa',    nombre: 'Ropa',    color: '#8A63D2' },
-  { id: 'compras', nombre: 'Compras', color: '#D9483B' }
+  { id: 'casa',    nombre: 'Casa',    color: '#A8D5BA', antiguo: '#2E9E6B' },
+  { id: 'cocina',  nombre: 'Cocina',  color: '#F6C89F', antiguo: '#E8912D' },
+  { id: 'bano',    nombre: 'Baño',    color: '#A7D3E8', antiguo: '#2FA3C4' },
+  { id: 'ropa',    nombre: 'Ropa',    color: '#C9B6E4', antiguo: '#8A63D2' },
+  { id: 'compras', nombre: 'Compras', color: '#F4A9A8', antiguo: '#D9483B' }
 ];
 
 /* ---------- Iconos ---------- */
@@ -355,6 +355,14 @@ function escucharDatos() {
     if (snap.empty && !snap.metadata.fromCache) {
       CATEGORIAS_INICIALES.forEach(c =>
         FB.setDoc(FB.doc(db, 'categorias', c.id), { nombre: c.nombre, color: c.color }, { merge: true }).catch(alError));
+    }
+    if (!snap.metadata.fromCache) {
+      // v1.5: pasar a tonos pastel las categorías que conservan su color original
+      snap.docs.forEach(d => {
+        const base = CATEGORIAS_INICIALES.find(c => c.id === d.id);
+        if (base && (d.data().color || '').toUpperCase() === base.antiguo)
+          FB.updateDoc(d.ref, { color: base.color }).catch(alError);
+      });
     }
     S.categorias = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
     pintar();
@@ -814,7 +822,7 @@ function formularioCategorias() {
       <input type="color" value="${esc(c.color)}" aria-label="Color de ${esc(c.nombre)}">
       <input type="text" value="${esc(c.nombre)}" aria-label="Nombre de la categoría" maxlength="30">
       <button class="icono" data-borrarcat="${c.id}" aria-label="Borrar ${esc(c.nombre)}"${usadas.has(c.id) ? ' disabled title="Tiene tareas asignadas"' : ''}>✕</button></div>`).join('')}</div>
-    <div class="cat-edit"><input type="color" id="nc-color" value="#2FA3C4" aria-label="Color de la nueva categoría">
+    <div class="cat-edit"><input type="color" id="nc-color" value="#F9E3A3" aria-label="Color de la nueva categoría">
       <input type="text" id="nc-nombre" placeholder="Nueva categoría" maxlength="30"></div>
     <p style="color:var(--tinta-suave);font-size:.85rem">Solo se pueden borrar las categorías sin tareas.</p>
     <div class="acciones"><button class="btn sec" data-cerrar>Cancelar</button><button class="btn" id="c-guardar">Guardar</button></div>`);
