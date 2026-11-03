@@ -227,9 +227,16 @@ textarea{min-height:70px;resize:vertical}
 .estrellas .apagada{color:var(--linea)}
 .progreso{font-size:.88rem;font-weight:800;color:var(--menta)}
 .desc{font-size:.88rem;color:var(--tinta-suave);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.estrellas-btn{display:flex;gap:4px}
-.estrellas-btn button{border:0;background:none;font-size:2rem;line-height:1;padding:2px;color:var(--linea)}
-.estrellas-btn button.on{color:var(--sol)}
+.nota-peli{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px}
+.nota-peli .media{font-weight:900;font-size:1.05rem}
+.nota-peli .media span{color:var(--sol)}
+.nota-peli small{font-size:.8rem;font-weight:700;color:var(--tinta-suave)}
+.voto{display:grid;grid-template-columns:40px 1fr 28px;align-items:center;gap:6px;margin-bottom:8px}
+.voto-q{font-weight:900;font-size:.88rem;color:var(--pc)}
+.voto-n{display:grid;grid-template-columns:repeat(10,1fr);gap:3px}
+.voto-n button{border:1px solid var(--linea);background:var(--superficie);border-radius:8px;height:36px;padding:0;font-weight:800;font-size:.85rem;color:var(--tinta-suave);min-width:0}
+.voto-n button.on{background:var(--pc);border-color:var(--pc);color:#fff}
+.voto-val{font-weight:900;text-align:right}
 .contador{display:flex;align-items:center;gap:10px}
 .contador .num{font-weight:900;font-size:1.4rem;min-width:3ch;text-align:center}
 .rueda{position:relative;width:min(320px,86vw);margin:6px auto 12px}
@@ -293,7 +300,7 @@ const firebaseConfig = {
   measurementId: "G-G3KRG9DN75"
 };
 
-const VERSION_APP = '1.7';
+const VERSION_APP = '1.7.1';
 const PERSONAS = { ivan: { nombre: 'Iván' }, jen: { nombre: 'Jen' } };
 const CLAVE_TABLET = 'homeplan-tablet';
 const MINUTOS_VOLVER_A_HOY = 5;
@@ -975,13 +982,30 @@ function formularioHabituales() {
 
 /* =====================================================================
    Películas y series
-   Colección pelis { titulo, tipo: peli|serie, descripcion, plataforma, categorias[], puntuacion 0-5,
+   Colección pelis { titulo, tipo: peli|serie, descripcion, plataforma, categorias[], votos { ivan: 0-10, jen: 0-10 },
                      estado: pendiente|viendo|vista, episodios, progreso { episodio, minuto }, creado }
    ajustes/pelis { plataformas[], categorias[] }
    ===================================================================== */
 const ESTADOS_PELI = [['pendiente', 'Pendiente'], ['viendo', 'Viendo'], ['vista', 'Vista']];
 const nombreEstado = k => (ESTADOS_PELI.find(e => e[0] === k) || ESTADOS_PELI[0])[1];
-const estrellasTexto = n => n ? '★'.repeat(n) + `<span class="apagada">${'★'.repeat(5 - n)}</span>` : '';
+/* Puntuación de 1 a 10, un voto de cada uno; la nota es la media de los votos que haya.
+   (puntuacion 1-5 de la v1.7 se muestra ×2 hasta que alguien vote) */
+const votosDe = p => ({ ivan: +(p.votos && p.votos.ivan) || 0, jen: +(p.votos && p.votos.jen) || 0 });
+function notaPeli(p) {
+  const v = votosDe(p), xs = [v.ivan, v.jen].filter(Boolean);
+  if (xs.length) return xs.reduce((a, b) => a + b, 0) / xs.length;
+  return p.puntuacion ? p.puntuacion * 2 : 0;
+}
+const fmtNota = n => Number.isInteger(n) ? String(n) : n.toFixed(1).replace('.', ',');
+function notaHTML(p) {
+  const n = notaPeli(p); if (!n) return '';
+  const v = votosDe(p);
+  const detalle = v.ivan || v.jen ? `Iván ${v.ivan || '–'} · Jen ${v.jen || '–'}` : 'nota anterior';
+  return `<div class="nota-peli"><span class="media"><span>★</span> ${fmtNota(n)}</span><small>${detalle}</small></div>`;
+}
+const votoHTML = (id, quien, valor) => `<div class="voto p-${quien}"><span class="voto-q">${PERSONAS[quien].nombre}</span>
+  <div class="voto-n" id="${id}">${Array.from({ length: 10 }, (_, k) => k + 1).map(n => `<button type="button" data-v="${n}" class="${n <= valor ? 'on' : ''}" aria-label="${PERSONAS[quien].nombre}: ${n} de 10">${n}</button>`).join('')}</div>
+  <span class="voto-val" id="${id}-val">${valor || '–'}</span></div>`;
 const listasPelis = () => {
   const a = S.ajustesPelis || AJUSTES_PELIS_INICIALES;
   const usadasP = S.pelis.map(p => p.plataforma).filter(Boolean);
@@ -1011,15 +1035,15 @@ function filtrarPelis(F, { sinVistas = false } = {}) {
     if (F.tipo !== 'todo' && (p.tipo || 'peli') !== F.tipo) return false;
     if (F.plataforma !== 'todas' && p.plataforma !== F.plataforma) return false;
     if (F.categoria !== 'todas' && !(p.categorias || []).includes(F.categoria)) return false;
-    if (F.puntos === 'sin' && (p.puntuacion || 0) > 0) return false;
-    if (/^\d$/.test(F.puntos) && (p.puntuacion || 0) < +F.puntos) return false;
+    if (F.puntos === 'sin' && notaPeli(p) > 0) return false;
+    if (/^\d+$/.test(F.puntos) && notaPeli(p) < +F.puntos) return false;
     if (q && !normal(`${p.titulo} ${p.descripcion || ''}`).includes(q)) return false;
     return true;
   });
   const orden = {
     recientes: (a, b) => b._ts - a._ts,
     titulo: (a, b) => a.titulo.localeCompare(b.titulo, 'es'),
-    puntuacion: (a, b) => (b.puntuacion || 0) - (a.puntuacion || 0) || a.titulo.localeCompare(b.titulo, 'es')
+    puntuacion: (a, b) => notaPeli(b) - notaPeli(a) || a.titulo.localeCompare(b.titulo, 'es')
   }[F.orden] || ((a, b) => b._ts - a._ts);
   return xs.sort(orden);
 }
@@ -1029,7 +1053,7 @@ function tarjetaPeli(p) {
   return `<div class="peli${p.estado === 'vista' ? ' vista' : ''}" data-peli="${p.id}" role="button" tabindex="0">
     <div class="pills"><span class="pill">${p.tipo === 'serie' ? 'Serie' : 'Película'}</span>${p.plataforma ? `<span class="pill plat">${esc(p.plataforma)}</span>` : ''}${p.estado === 'viendo' ? '<span class="pill viendo">Viendo</span>' : ''}${p.estado === 'vista' ? '<span class="pill vista">Vista</span>' : ''}</div>
     <div class="peli-tit">${esc(p.titulo)}</div>
-    ${p.puntuacion ? `<div class="estrellas" aria-label="${p.puntuacion} de 5">${estrellasTexto(p.puntuacion)}</div>` : ''}
+    ${notaHTML(p)}
     ${(p.categorias || []).length ? `<div class="pills">${p.categorias.map(c => `<span class="pill cat">${esc(c)}</span>`).join('')}</div>` : ''}
     ${prog ? `<div class="progreso">${prog}</div>` : ''}
     ${p.descripcion ? `<div class="desc">${esc(p.descripcion)}</div>` : ''}
@@ -1053,7 +1077,7 @@ function vistaPelis() {
       ${sel('tipo', [['todo', 'Pelis y series'], ['peli', 'Solo películas'], ['serie', 'Solo series']])}
       ${sel('plataforma', [['todas', 'Todas las plataformas'], ...L.plataformas.map(x => [x, x])])}
       ${sel('categoria', [['todas', 'Todas las categorías'], ...L.categorias.map(x => [x, x])])}
-      ${sel('puntos', [['todas', 'Cualquier puntuación'], ['5', '★★★★★'], ['4', '★★★★ o más'], ['3', '★★★ o más'], ['2', '★★ o más'], ['1', '★ o más'], ['sin', 'Sin puntuar']])}
+      ${sel('puntos', [['todas', 'Cualquier nota'], ['9', '★ 9 o más'], ['8', '★ 8 o más'], ['7', '★ 7 o más'], ['6', '★ 6 o más'], ['5', '★ 5 o más'], ['sin', 'Sin puntuar']])}
       ${sel('orden', [['recientes', 'Más recientes'], ['titulo', 'Por título'], ['puntuacion', 'Mejor puntuadas']])}
       <div class="seg" role="group" aria-label="Estado">${[['porver', 'Por ver'], ['viendo', 'Viendo'], ['vista', 'Vistas'], ['todas', 'Todas']].map(([k, n]) => `<button data-pfestado="${k}" aria-pressed="${F.estado === k}">${n}</button>`).join('')}</div>
     </div>
@@ -1073,7 +1097,8 @@ function fichaPeli(p) {
   abrirHoja(`<h3>${esc(p.titulo)}</h3>
     <div class="pills" style="margin-bottom:10px"><span class="pill">${serie ? 'Serie' : 'Película'}</span>${p.plataforma ? `<span class="pill plat">${esc(p.plataforma)}</span>` : ''}${(p.categorias || []).map(c => `<span class="pill cat">${esc(c)}</span>`).join('')}</div>
     ${p.descripcion ? `<p style="white-space:pre-wrap;margin:0 0 12px">${esc(p.descripcion)}</p>` : ''}
-    <div class="campo"><span class="lbl">Puntuación</span><div class="estrellas-btn" id="pf-estrellas">${[1, 2, 3, 4, 5].map(n => `<button type="button" data-n="${n}" class="${n <= (p.puntuacion || 0) ? 'on' : ''}" aria-label="${n} estrellas">★</button>`).join('')}</div></div>
+    <div class="campo"><span class="lbl">Puntuación (1 a 10)${notaPeli(p) ? ` · nota: ★ ${fmtNota(notaPeli(p))}` : ''}</span>
+      ${votoHTML('pf-v-ivan', 'ivan', votosDe(p).ivan)}${votoHTML('pf-v-jen', 'jen', votosDe(p).jen)}</div>
     <div class="campo"><span class="lbl">Estado</span><div class="seg" id="pf-estado">${ESTADOS_PELI.map(([k, n]) => `<button type="button" data-r="${k}" aria-pressed="${(p.estado || 'pendiente') === k}">${n}</button>`).join('')}</div></div>
     <div class="campo" style="background:var(--superficie);border:1px solid var(--linea);border-radius:var(--radio);padding:12px">
       <span class="lbl">Dónde nos hemos quedado</span>
@@ -1086,11 +1111,15 @@ function fichaPeli(p) {
     <div class="acciones"><button class="btn sec" data-cerrar>Cerrar</button><button class="btn" id="pf-editar">Editar</button></div>
     <button class="btn peligro ancho" id="pf-borrar" style="margin-top:10px">Borrar</button>`);
   if (!ep) ep = 1;
-  $('#pf-estrellas').onclick = e => {
-    const b = e.target.closest('[data-n]'); if (!b) return;
-    const n = +b.dataset.n;
-    guardar({ puntuacion: n === p.puntuacion ? 0 : n });
-  };
+  ['ivan', 'jen'].forEach(q => {
+    $(`#pf-v-${q}`).onclick = e => {
+      const b = e.target.closest('[data-v]'); if (!b) return;
+      const actual = votosDe(p)[q], n = +b.dataset.v === actual ? 0 : +b.dataset.v;
+      // se guarda solo el voto de esa persona, para no pisar el del otro
+      FB.updateDoc(FB.doc(db, 'pelis', p.id), { [`votos.${q}`]: n }).catch(alError);
+      fichaPeli({ ...p, votos: { ...votosDe(p), [q]: n } });
+    };
+  });
   activarSeg('pf-estado', r => guardar({ estado: r }, `Marcada como ${nombreEstado(r).toLowerCase()}`));
   if (serie) {
     const max = parseInt(p.episodios, 10) || 9999;
@@ -1114,9 +1143,9 @@ function fichaPeli(p) {
 
 function formularioPeli(p) {
   const nueva = !p;
-  const v = p || { titulo: '', tipo: 'peli', descripcion: '', plataforma: '', categorias: [], puntuacion: 0, estado: 'pendiente', episodios: null };
+  const v = p || { titulo: '', tipo: 'peli', descripcion: '', plataforma: '', categorias: [], votos: { ivan: 0, jen: 0 }, estado: 'pendiente', episodios: null };
   const L = listasPelis();
-  let tipo = v.tipo || 'peli', plataforma = v.plataforma || '', cats = [...(v.categorias || [])], puntos = v.puntuacion || 0, estado = v.estado || 'pendiente';
+  let tipo = v.tipo || 'peli', plataforma = v.plataforma || '', cats = [...(v.categorias || [])], votos = votosDe(v), estado = v.estado || 'pendiente';
   const todasCats = [...new Set([...L.categorias, ...cats])];
   const chipsPlat = () => L.plataformas.map(x => `<button type="button" class="sug" data-plat="${esc(x)}" aria-pressed="${plataforma === x}" style="${plataforma === x ? 'background:var(--tinta);color:var(--papel)' : ''}">${esc(x)}</button>`).join('');
   const chipsCat = () => todasCats.map(x => `<button type="button" class="sug" data-cat="${esc(x)}" style="${cats.includes(x) ? 'background:var(--tinta);color:var(--papel)' : ''}">${esc(x)}</button>`).join('');
@@ -1130,7 +1159,7 @@ function formularioPeli(p) {
       <div class="fila2" style="margin-top:8px"><input type="text" id="pe-cat-nueva" placeholder="Nueva categoría" maxlength="30"><button type="button" class="btn sec" id="pe-cat-anadir" style="flex:none">Añadir</button></div></div>
     <div class="campo${tipo === 'serie' ? '' : ' hidden'}" id="pe-eps-c"><label for="pe-eps">Número de episodios</label><input type="number" id="pe-eps" min="1" max="9999" value="${esc(v.episodios || '')}" placeholder="Opcional"></div>
     <div class="campo"><span class="lbl">Estado</span><div class="seg" id="pe-estado">${ESTADOS_PELI.map(([k, n]) => `<button type="button" data-r="${k}" aria-pressed="${estado === k}">${n}</button>`).join('')}</div></div>
-    <div class="campo"><span class="lbl">Puntuación</span><div class="estrellas-btn" id="pe-estrellas">${[1, 2, 3, 4, 5].map(n => `<button type="button" data-n="${n}" class="${n <= puntos ? 'on' : ''}" aria-label="${n} estrellas">★</button>`).join('')}</div></div>
+    <div class="campo"><span class="lbl">Puntuación (1 a 10, opcional)</span>${votoHTML('pe-v-ivan', 'ivan', votos.ivan)}${votoHTML('pe-v-jen', 'jen', votos.jen)}</div>
     <div class="acciones"><button class="btn sec" data-cerrar>Cancelar</button><button class="btn" id="pe-guardar">Guardar</button></div>`);
   activarSeg('pe-tipo', r => { tipo = r; $('#pe-eps-c').classList.toggle('hidden', tipo !== 'serie'); });
   activarSeg('pe-estado', r => { estado = r; });
@@ -1155,11 +1184,14 @@ function formularioPeli(p) {
     $('#pe-cat-nueva').value = '';
     $('#pe-cats').innerHTML = chipsCat();
   };
-  $('#pe-estrellas').onclick = e => {
-    const b = e.target.closest('[data-n]'); if (!b) return;
-    puntos = +b.dataset.n === puntos ? 0 : +b.dataset.n;
-    sheet.querySelectorAll('#pe-estrellas button').forEach(x => x.classList.toggle('on', +x.dataset.n <= puntos));
-  };
+  ['ivan', 'jen'].forEach(q => {
+    $(`#pe-v-${q}`).onclick = e => {
+      const b = e.target.closest('[data-v]'); if (!b) return;
+      votos[q] = +b.dataset.v === votos[q] ? 0 : +b.dataset.v;
+      sheet.querySelectorAll(`#pe-v-${q} button`).forEach(x => x.classList.toggle('on', +x.dataset.v <= votos[q]));
+      $(`#pe-v-${q}-val`).textContent = votos[q] || '–';
+    };
+  });
   $('#pe-guardar').onclick = () => {
     const titulo = $('#pe-titulo').value.trim();
     if (!titulo) { $('#pe-titulo').focus(); return avisar('Escribe el título'); }
@@ -1168,7 +1200,7 @@ function formularioPeli(p) {
     const plat = otra || plataforma;
     const datos = {
       titulo, tipo, descripcion: $('#pe-desc').value.trim(), plataforma: plat, categorias: cats,
-      puntuacion: puntos, estado, episodios: tipo === 'serie' ? (parseInt($('#pe-eps').value, 10) || null) : null
+      votos, estado, episodios: tipo === 'serie' ? (parseInt($('#pe-eps').value, 10) || null) : null
     };
     const op = nueva
       ? FB.addDoc(FB.collection(db, 'pelis'), { ...datos, progreso: { episodio: null, minuto: 0 }, creado: FB.serverTimestamp(), creadoPor: S.tablet ? 'tablet' : S.yo })
@@ -1217,7 +1249,7 @@ function hojaRuleta() {
     let xs = candidatos();
     const total = xs.length;
     if (xs.length > 24) xs = [...xs].sort(() => Math.random() - 0.5).slice(0, 24);
-    const filtrosTxt = [F.plataforma !== 'todas' && F.plataforma, F.categoria !== 'todas' && F.categoria, /^\d$/.test(F.puntos) && `${F.puntos}★ o más`].filter(Boolean).join(', ');
+    const filtrosTxt = [F.plataforma !== 'todas' && F.plataforma, F.categoria !== 'todas' && F.categoria, /^\d+$/.test(F.puntos) && `nota ${F.puntos} o más`].filter(Boolean).join(', ');
     abrirHoja(`<h3>🎲 ¿Qué vemos?</h3>
       <p class="sub">Entre ${total} ${total === 1 ? 'título' : 'títulos'} sin ver${filtrosTxt ? ` (${esc(filtrosTxt)})` : ''}${total > 24 ? '. En la rueda salen 24 al azar' : ''}.</p>
       <div class="seg" id="ru-tipo" style="margin-bottom:12px">${[['todo', 'Todo'], ['peli', 'Películas'], ['serie', 'Series']].map(([k, n]) => `<button type="button" data-r="${k}" aria-pressed="${tipo === k}">${n}</button>`).join('')}</div>
