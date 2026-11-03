@@ -2,7 +2,7 @@
    - index.html: primero la red (así los cambios llegan enseguida); si no hay conexión, la copia guardada.
    - SDK de Firebase, fuentes e iconos: primero la copia guardada.
    - Las peticiones a la base de datos de Firebase NO pasan por aquí. */
-const CACHE = 'homeplan-v1.0';
+const CACHE = 'homeplan-v1.6';
 const BASICOS = ['./', './index.html', './manifest.json', './icono-192.png', './icono-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {

@@ -1,12 +1,12 @@
 {
   "name": "HomePlan",
   "short_name": "HomePlan",
-  "description": "Tareas de casa de Iván y Jen",
+  "description": "Tablón de casa de Iván y Jen",
   "lang": "es",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "orientation": "portrait",
+  "orientation": "any",
   "background_color": "#F3F7F6",
   "theme_color": "#17303A",
   "icons": [

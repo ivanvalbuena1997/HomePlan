@@ -18,7 +18,10 @@
   --papel:#F3F7F6; --superficie:#FFFFFF; --tinta:#17303A; --tinta-suave:#5B7079;
   --azulejo:#D7ECEF; --linea:#DDE6E6; --menta:#2E9E6B; --menta-suave:#DDF2E6;
   --sol:#FFC93C; --alerta:#D9483B; --alerta-suave:#FBE3E0;
-  --ivan:#2F6FDB; --jen:#C2449A;
+  /* Colores de persona: azul Iván, lila Jen, amarillo los dos */
+  --ivan:#2F74D9; --ivan-suave:#E2EDFC;
+  --jen:#8B5CD6;  --jen-suave:#EEE6FB;
+  --ambos:#E3A400; --ambos-suave:#FFF3CC; --ambos-texto:#3A2C00;
   --radio:14px;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
@@ -29,7 +32,9 @@
     --papel:#0E1C21; --superficie:#16272D; --tinta:#E6F0F1; --tinta-suave:#9AB0B6;
     --azulejo:#1D3A41; --linea:#24393F; --menta:#3DBB82; --menta-suave:#173A2B;
     --sol:#FFD25C; --alerta:#F06A5C; --alerta-suave:#3A1F1C;
-    --ivan:#6C9BF0; --jen:#E07BC0;
+    --ivan:#6FA2F2; --ivan-suave:#1B2D47;
+    --jen:#B597F2;  --jen-suave:#2C2245;
+    --ambos:#F2C43D; --ambos-suave:#3A3115; --ambos-texto:#2A1F00;
   }
 }
 *,*::before,*::after{box-sizing:border-box}
@@ -37,113 +42,173 @@ html,body{margin:0;height:100%}
 body{background:var(--papel);color:var(--tinta);font-family:'Nunito',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:16px;line-height:1.45;-webkit-tap-highlight-color:transparent}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
+button:disabled{opacity:.45;cursor:default}
 :focus-visible{outline:3px solid var(--sol);outline-offset:2px}
 .hidden{display:none!important}
 
 /* Estructura */
-#app{max-width:640px;margin:0 auto;min-height:100%;padding:0 16px 96px}
-header.top{display:flex;align-items:center;justify-content:space-between;padding:14px 0 6px}
+#app{max-width:640px;margin:0 auto;min-height:100%;padding:0 16px 100px}
+header.top{display:flex;align-items:center;justify-content:space-between;padding:14px 0 6px;gap:10px}
 .marca{font-weight:900;font-size:1.25rem;letter-spacing:-.02em;display:flex;align-items:center;gap:8px}
 .marca .tejado{width:26px;height:26px}
 .ver{font-size:.75rem;font-weight:800;color:var(--tinta-suave);background:var(--azulejo);border-radius:999px;padding:2px 8px;margin-left:2px}
-.yo{border:0;background:var(--azulejo);border-radius:999px;padding:6px 12px;font-weight:700;font-size:.9rem}
+.yo{border:0;background:var(--azulejo);border-radius:999px;padding:6px 12px;font-weight:800;font-size:.9rem}
 nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--superficie);border-top:1px solid var(--linea);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom,0px);z-index:10}
 nav.tabs .in{display:flex;width:100%;max-width:640px}
-nav.tabs button{flex:1;border:0;background:none;padding:10px 2px 12px;font-size:.78rem;font-weight:700;color:var(--tinta-suave);display:flex;flex-direction:column;align-items:center;gap:3px}
-nav.tabs button svg{width:22px;height:22px}
+nav.tabs button{flex:1;border:0;background:none;padding:10px 2px 12px;font-size:.8rem;font-weight:700;color:var(--tinta-suave);display:flex;flex-direction:column;align-items:center;gap:3px}
+nav.tabs button svg{width:24px;height:24px}
 nav.tabs button[aria-current="page"]{color:var(--tinta)}
 nav.tabs button[aria-current="page"] svg{color:var(--menta)}
 
-/* Cabecera de Hoy: el elemento protagonista */
-.hoy-cab{margin:10px 0 18px;padding:18px 18px 16px;background:var(--azulejo);border-radius:22px;position:relative;overflow:hidden}
-.hoy-cab .dia{font-weight:900;font-size:2.1rem;line-height:1.05;letter-spacing:-.03em;margin:0}
-.hoy-cab .fecha{color:var(--tinta-suave);font-weight:700;margin:4px 0 14px}
-.barra{height:12px;background:var(--superficie);border-radius:999px;overflow:hidden}
-.barra i{display:block;height:100%;background:var(--menta);border-radius:999px;transition:width .4s ease}
-.hoy-cab .cuenta{margin-top:8px;font-weight:700;font-size:.95rem}
+/* Cabecera del tablón */
+.tablon-cab{margin:8px 0 12px;padding:16px 18px;background:var(--azulejo);border-radius:22px;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:8px 18px}
+.tablon-cab .dia{font-weight:900;font-size:1.9rem;line-height:1.05;letter-spacing:-.03em;margin:0}
+.tablon-cab .reloj{font-weight:900;color:var(--tinta-suave)}
+.tablon-cab .resumen{font-weight:800;font-size:.95rem;display:flex;flex-wrap:wrap;gap:4px 12px}
+.controles{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.controles .seg{flex:1;min-width:160px}
+.nav-fecha{display:flex;align-items:center;gap:6px;flex:2;min-width:250px}
+.nav-fecha .tit{flex:1;text-align:center;font-weight:900;font-size:1.05rem}
 
 h2{font-size:1.05rem;font-weight:800;margin:22px 0 8px}
 h2 .n{color:var(--tinta-suave);font-weight:700}
 .vacio{color:var(--tinta-suave);background:var(--superficie);border:1px dashed var(--linea);border-radius:var(--radio);padding:16px;text-align:center}
+.vacio.grande{margin-top:40px;padding:40px 20px;font-weight:700}
+.sub{margin:0 0 14px;color:var(--tinta-suave)}
+.nota{color:var(--tinta-suave);font-size:.85rem}
 
-/* Filas de tarea */
-.lista{display:flex;flex-direction:column;gap:8px}
-.fila{display:flex;gap:12px;align-items:flex-start;background:var(--superficie);border-radius:var(--radio);padding:12px;border:1px solid var(--linea)}
-.fila.atrasada{border-color:var(--alerta);background:linear-gradient(90deg,var(--alerta-suave),var(--superficie) 40%)}
-.fila.hecha .nombre{text-decoration:line-through;color:var(--tinta-suave)}
-.check{flex:none;width:34px;height:34px;border-radius:50%;border:3px solid var(--menta);background:transparent;display:grid;place-items:center;padding:0}
-.check svg{width:18px;height:18px;opacity:0;color:#fff}
+/* Colores por persona */
+.p-ivan{--pc:var(--ivan);--pc-suave:var(--ivan-suave)}
+.p-jen{--pc:var(--jen);--pc-suave:var(--jen-suave)}
+.p-ambos{--pc:var(--ambos);--pc-suave:var(--ambos-suave)}
+
+/* Semana */
+.semana{display:flex;flex-direction:column;gap:6px}
+.dia-col{scroll-margin-top:8px}
+.dia-col h3{display:flex;align-items:center;justify-content:space-between;font-size:.98rem;margin:14px 0 6px;font-weight:800}
+.dia-col.es-hoy h3{color:var(--menta)}
+.dia-col h3 .corto{display:none}
+.mas-dia{border:1px solid var(--linea);background:var(--superficie);border-radius:10px;width:32px;height:32px;display:grid;place-items:center;padding:0;color:var(--tinta-suave)}
+.mas-dia svg{width:18px;height:18px}
+.libre{color:var(--tinta-suave);font-size:.9rem;margin:2px 0 4px;padding:8px 12px;border:1px dashed var(--linea);border-radius:12px}
+
+/* Tarjetas */
+.lista{display:flex;flex-direction:column;gap:6px}
+.tarjeta{display:flex;gap:10px;align-items:flex-start;background:var(--pc-suave,var(--superficie));border-left:5px solid var(--pc,var(--linea));border-radius:12px;padding:10px}
+.tarjeta.atrasada{box-shadow:0 0 0 2px var(--alerta)}
+.tarjeta.hecha{opacity:.62}
+.tarjeta.hecha .nombre{text-decoration:line-through}
+.tarjeta.pasado{opacity:.55}
+.check{flex:none;width:32px;height:32px;border-radius:50%;border:3px solid var(--menta);background:var(--superficie);display:grid;place-items:center;padding:0}
+.check svg{width:17px;height:17px;opacity:0;color:#fff}
 .check.lleno{background:var(--menta)}
 .check.lleno svg{opacity:1}
 .check.pop{animation:pop .35s ease}
 @keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.25)}100%{transform:scale(1)}}
-.check.futuro{border-style:dashed;border-color:var(--linea)}
+.check.futuro{border-style:dashed;border-color:var(--pc,var(--linea));background:transparent;opacity:.6}
+.ev-ico{flex:none;width:32px;height:32px;display:grid;place-items:center;color:var(--pc)}
+.ev-ico svg{width:22px;height:22px}
 .info{flex:1;min-width:0;cursor:pointer}
-.nombre{font-weight:800}
-.meta{display:flex;flex-wrap:wrap;gap:6px 10px;font-size:.84rem;color:var(--tinta-suave);margin-top:3px;align-items:center}
-.cat{display:inline-flex;align-items:center;gap:5px;font-weight:700;color:var(--tinta)}
-.cat::before{content:"";width:11px;height:11px;border-radius:3px;background:var(--c);box-shadow:inset 0 0 0 1px rgba(23,48,58,.12)}
-.persona{font-weight:800;border-radius:999px;padding:1px 8px;font-size:.78rem;color:#fff;background:var(--p)}
+.nombre{font-weight:800;overflow-wrap:anywhere}
+.meta{display:flex;flex-wrap:wrap;gap:2px 10px;font-size:.84rem;color:var(--tinta-suave);margin-top:2px;align-items:center}
+.meta .quien{font-weight:800;color:var(--tinta)}
+.meta .hora{font-weight:800;color:var(--tinta)}
 .rojo{color:var(--alerta);font-weight:800}
 
-/* Controles */
-.seg{display:flex;background:var(--superficie);border:1px solid var(--linea);border-radius:999px;padding:3px;gap:2px}
-.seg button{flex:1;border:0;background:none;border-radius:999px;padding:7px 10px;font-weight:700;font-size:.9rem;color:var(--tinta-suave)}
-.seg button[aria-pressed="true"]{background:var(--tinta);color:var(--papel)}
-.filtros{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
-.filtros select{flex:1;min-width:130px}
-select,input[type=text],input[type=number],input[type=date],textarea{width:100%;background:var(--superficie);border:1px solid var(--linea);border-radius:12px;padding:10px 12px}
-textarea{min-height:70px;resize:vertical}
-.btn{border:0;border-radius:12px;padding:12px 16px;font-weight:800;background:var(--tinta);color:var(--papel)}
-.btn.sec{background:var(--azulejo);color:var(--tinta)}
-.btn.peligro{background:var(--alerta-suave);color:var(--alerta)}
-.btn.ancho{width:100%}
-.fab{position:fixed;right:max(16px,calc(50% - 304px));bottom:calc(84px + env(safe-area-inset-bottom,0px));width:58px;height:58px;border-radius:50%;border:0;background:var(--sol);color:#17303A;box-shadow:0 6px 18px rgba(23,48,58,.25);display:grid;place-items:center;z-index:11}
-.fab svg{width:28px;height:28px}
-
-/* Calendario */
-.cal-nav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:10px 0}
-.cal-nav .tit{font-weight:900;font-size:1.1rem;text-align:center;flex:1}
-.icono{border:1px solid var(--linea);background:var(--superficie);border-radius:12px;width:40px;height:40px;display:grid;place-items:center;padding:0}
-.icono svg{width:20px;height:20px}
-.mes{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+/* Mes */
+.mes{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
 .mes .dsem{text-align:center;font-size:.75rem;font-weight:800;color:var(--tinta-suave);padding:4px 0}
-.celda{background:var(--superficie);border:1px solid var(--linea);border-radius:10px;min-height:64px;padding:4px;text-align:left;display:flex;flex-direction:column;gap:3px}
+.celda{background:var(--superficie);border:1px solid var(--linea);border-radius:10px;min-height:64px;padding:4px;text-align:left;display:flex;flex-direction:column;gap:3px;min-width:0;overflow:hidden}
 .celda.fuera{opacity:.45}
 .celda.es-hoy{border:2px solid var(--sol)}
 .celda .num{font-weight:800;font-size:.85rem}
 .celda .marcas{display:flex;flex-wrap:wrap;gap:3px}
-.celda .m{width:8px;height:8px;border-radius:50%;background:var(--c)}
-.celda .m.ok{outline:2px solid var(--menta);outline-offset:1px}
+.mini{width:8px;height:8px;border-radius:50%;background:var(--pc);font-size:0;overflow:hidden}
+.mini.ok{outline:2px solid var(--menta);outline-offset:1px}
 .celda .mas{font-size:.7rem;font-weight:800;color:var(--tinta-suave)}
-.semana-dia{margin-bottom:12px}
-.semana-dia h3{font-size:.95rem;margin:14px 0 6px;font-weight:800}
-.semana-dia h3.es-hoy{color:var(--menta)}
+
+/* Controles */
+.seg{display:flex;background:var(--superficie);border:1px solid var(--linea);border-radius:999px;padding:3px;gap:2px}
+.seg button{flex:1;border:0;background:none;border-radius:999px;padding:7px 10px;font-weight:700;font-size:.92rem;color:var(--tinta-suave);white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--tinta);color:var(--papel)}
+select,input[type=text],input[type=number],input[type=date],input[type=time],textarea{width:100%;background:var(--superficie);border:1px solid var(--linea);border-radius:12px;padding:10px 12px;min-height:44px}
+textarea{min-height:70px;resize:vertical}
+.btn{border:0;border-radius:12px;padding:12px 16px;font-weight:800;background:var(--tinta);color:var(--papel)}
+.btn.sec{background:var(--azulejo);color:var(--tinta)}
+.btn.peligro{background:var(--alerta-suave);color:var(--alerta)}
+.btn.ok{background:var(--menta);color:#fff}
+.btn.ancho{width:100%}
+.btn.peq{padding:8px 12px}
+.icono{border:1px solid var(--linea);background:var(--superficie);border-radius:12px;width:42px;height:42px;display:grid;place-items:center;padding:0;flex:none}
+.icono svg{width:20px;height:20px}
+.fab{position:fixed;right:max(16px,calc(50% - 304px));bottom:calc(86px + env(safe-area-inset-bottom,0px));width:60px;height:60px;border-radius:50%;border:0;background:var(--sol);color:#17303A;box-shadow:0 6px 18px rgba(23,48,58,.25);display:grid;place-items:center;z-index:11}
+.fab svg{width:28px;height:28px}
 
 /* Hoja inferior (formularios) */
 .sheet{position:fixed;inset:0;background:rgba(10,25,30,.45);z-index:20;display:flex;align-items:flex-end;justify-content:center}
 .sheet .panel{background:var(--papel);width:100%;max-width:640px;max-height:92vh;overflow:auto;border-radius:22px 22px 0 0;padding:18px 16px calc(24px + env(safe-area-inset-bottom,0px))}
-.sheet h3{margin:0 0 12px;font-size:1.2rem;font-weight:900}
+.sheet h3{margin:0 0 6px;font-size:1.25rem;font-weight:900;overflow-wrap:anywhere}
 .campo{margin-bottom:14px}
-.campo label,.campo .lbl{display:block;font-weight:800;font-size:.9rem;margin-bottom:6px}
-.fila2{display:flex;gap:8px}
+.campo label,.campo .lbl,.lbl{display:block;font-weight:800;font-size:.9rem;margin-bottom:6px}
+.fila2{display:flex;gap:8px;align-items:center}
 .fila2>*{flex:1}
 .acciones{display:flex;gap:8px;margin-top:18px}
 .acciones .btn{flex:1}
-.cat-edit{display:flex;gap:8px;align-items:center;margin-bottom:8px}
-.cat-edit input[type=color]{width:44px;height:44px;border:1px solid var(--linea);border-radius:10px;padding:2px;background:var(--superficie)}
+.pila{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.chips{display:flex;gap:5px}
+.chip{flex:1;border:1px solid var(--linea);background:var(--superficie);border-radius:10px;padding:9px 0;font-weight:800}
+.chip[aria-pressed="true"]{background:var(--tinta);color:var(--papel);border-color:var(--tinta)}
+.opciones{display:flex;flex-direction:column;gap:8px}
+.opcion{text-align:left;border:2px solid var(--linea);background:var(--superficie);border-radius:14px;padding:10px 14px;font-weight:700}
+.opcion b{display:block;font-weight:900}
+.opcion[aria-pressed="true"]{border-color:var(--menta);background:var(--menta-suave)}
+.quien-btns{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0 12px}
+.quien-btns .btn{padding:16px 8px;font-size:1.05rem}
+.bq-ivan{background:var(--ivan)!important;color:#fff!important}
+.bq-jen{background:var(--jen)!important;color:#fff!important}
+.bq-ambos{background:var(--ambos)!important;color:var(--ambos-texto)!important}
+.ficha-meta{display:flex;flex-wrap:wrap;gap:4px 12px;color:var(--tinta-suave);font-weight:700;margin-bottom:6px}
+.interruptor{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--superficie);border:1px solid var(--linea);border-radius:14px;padding:12px 14px;margin:12px 0}
+.interruptor b{display:block}
+.interruptor span{color:var(--tinta-suave);font-size:.85rem}
 
-/* Aviso inferior */
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(92px + env(safe-area-inset-bottom,0px));background:var(--tinta);color:var(--papel);border-radius:14px;padding:10px 12px 10px 16px;display:flex;gap:12px;align-items:center;z-index:30;max-width:calc(100% - 32px);font-weight:700}
+/* Aviso (arriba, para no tapar las hojas inferiores) */
+.toast{position:fixed;left:0;right:0;margin:0 auto;width:fit-content;top:calc(12px + env(safe-area-inset-top,0px));box-shadow:0 6px 18px rgba(10,25,30,.3);background:var(--tinta);color:var(--papel);border-radius:14px;padding:10px 12px 10px 16px;display:flex;gap:12px;align-items:center;z-index:30;max-width:calc(100% - 32px);font-weight:700}
 .toast button{border:0;background:var(--sol);color:#17303A;border-radius:10px;padding:6px 10px;font-weight:800}
 
 /* Pantallas de acceso */
 .acceso{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:14px;padding:24px}
 .acceso .tejado{width:84px;height:84px}
 .acceso h1{font-size:2.4rem;font-weight:900;letter-spacing:-.03em;margin:0}
-.acceso p{color:var(--tinta-suave);max-width:32ch;margin:0}
+.acceso p{color:var(--tinta-suave);max-width:34ch;margin:0}
 .eleccion{display:flex;gap:12px;margin-top:6px}
 .eleccion button{border:0;border-radius:18px;padding:18px 26px;font-weight:900;font-size:1.2rem;color:#fff}
+
+/* Pantalla ancha (tablet en horizontal): la semana entera en 7 columnas */
+@media (min-width: 900px){
+  #app{max-width:none;padding:0 18px 96px}
+  nav.tabs .in{max-width:900px}
+  .fab{right:24px}
+  .tablon-cab{padding:12px 18px;align-items:center}
+  .tablon-cab .dia{font-size:1.7rem}
+  .semana{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;align-items:stretch}
+  .dia-col{background:var(--superficie);border:1px solid var(--linea);border-radius:16px;padding:8px;min-height:62vh}
+  .dia-col.es-hoy{border:2px solid var(--sol)}
+  .dia-col h3{margin:0 0 8px;font-size:1rem}
+  .dia-col h3 .corto{display:inline}
+  .dia-col h3 .largo{display:none}
+  .libre{border:0;padding:4px 2px;font-size:.85rem}
+  .tarjeta{padding:7px 7px 7px 6px;gap:7px;border-left-width:4px}
+  .tarjeta .nombre{font-size:.92rem;line-height:1.2}
+  .meta{font-size:.76rem;gap:0 8px}
+  .check,.ev-ico{width:28px;height:28px}
+  .check svg{width:15px;height:15px}
+  .ev-ico svg{width:19px;height:19px}
+  .celda{min-height:112px;padding:6px}
+  .celda .marcas{flex-direction:column;flex-wrap:nowrap;gap:2px}
+  .mini{width:auto;height:auto;border-radius:5px;background:var(--pc-suave);border-left:3px solid var(--pc);font-size:.72rem;font-weight:700;padding:0 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--tinta)}
+  .mini.ok{outline:0;text-decoration:line-through;opacity:.65}
+}
 
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -155,11 +220,7 @@ textarea{min-height:70px;resize:vertical}
 
 <script type="module">
 /* =====================================================================
-   HomePlan v1.0
-   ---------------------------------------------------------------------
-   1) PEGA AQUÍ tu firebaseConfig (el bloque que te dio la consola).
-   2) Si la consola te mostró otra versión en las URLs de gstatic
-      (…/firebasejs/X.Y.Z/…), cambia FIREBASE_VERSION por ese número.
+   HomePlan v1.6 — Tablón
    ===================================================================== */
 const FIREBASE_VERSION = '12.19.0';
 const firebaseConfig = {
@@ -172,28 +233,19 @@ const firebaseConfig = {
   measurementId: "G-G3KRG9DN75"
 };
 
-const VERSION_APP = '1.5';
-const PERSONAS = {
-  ivan: { nombre: 'Iván', color: 'var(--ivan)' },
-  jen:  { nombre: 'Jen',  color: 'var(--jen)' }
-};
-const CATEGORIAS_INICIALES = [
-  { id: 'casa',    nombre: 'Casa',    color: '#A8D5BA', antiguo: '#2E9E6B' },
-  { id: 'cocina',  nombre: 'Cocina',  color: '#F6C89F', antiguo: '#E8912D' },
-  { id: 'bano',    nombre: 'Baño',    color: '#A7D3E8', antiguo: '#2FA3C4' },
-  { id: 'ropa',    nombre: 'Ropa',    color: '#C9B6E4', antiguo: '#8A63D2' },
-  { id: 'compras', nombre: 'Compras', color: '#F4A9A8', antiguo: '#D9483B' }
-];
+const VERSION_APP = '1.6';
+const PERSONAS = { ivan: { nombre: 'Iván' }, jen: { nombre: 'Jen' } };
+const CLAVE_TABLET = 'homeplan-tablet';
+const MINUTOS_VOLVER_A_HOY = 5;
 
 /* ---------- Iconos ---------- */
 const I = {
   tejado: '<svg class="tejado" viewBox="0 0 48 48" aria-hidden="true"><path d="M6 23 24 8l18 15" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 21v17a3 3 0 0 0 3 3h18a3 3 0 0 0 3-3V21" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round"/><path d="m18 30 4.5 4.5L31 26" fill="none" stroke="#2E9E6B" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   ok: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-  hoy: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>',
   cal: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M3.5 10h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>',
-  yo: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="4" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M4.5 20.5c1.2-3.8 4-5.5 7.5-5.5s6.3 1.7 7.5 5.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>',
+  peli: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M3 9.5h18M8 5l-1.5 4.5M13 5l-1.5 4.5M18 5l-1.5 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="m10.5 12.5 4 2.2-4 2.2z" fill="currentColor"/></svg>',
+  carro: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2.2l2.3 11h10.2l2-8H7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9.5" cy="19" r="1.6" fill="currentColor"/><circle cx="16.5" cy="19" r="1.6" fill="currentColor"/></svg>',
   lista: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6.5h11M9 12h11M9 17.5h11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="4.5" cy="6.5" r="1.4" fill="currentColor"/><circle cx="4.5" cy="12" r="1.4" fill="currentColor"/><circle cx="4.5" cy="17.5" r="1.4" fill="currentColor"/></svg>',
-  hist: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4.5h4.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 8v4.5l3 2" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>',
   mas: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/></svg>',
   izq: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 6-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   der: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
@@ -212,9 +264,31 @@ function sumarMeses(s, n) {
   t.setDate(Math.min(dia, ultimo));
   return ymd(t);
 }
+const diasEntre = (a, b) => Math.round((aFecha(b) - aFecha(a)) / 864e5);
+const mesesEntre = (a, b) => { const x = aFecha(a), y = aFecha(b); return (y.getFullYear() - x.getFullYear()) * 12 + y.getMonth() - x.getMonth(); };
+const diaSemana = s => (aFecha(s).getDay() + 6) % 7; // lunes = 0
+const lunesDe = s => sumarDias(s, -diaSemana(s));
+const mayor = (a, b) => (a > b ? a : b);
+const DIAS_CORTOS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+const fmt = (s, o) => cap(new Intl.DateTimeFormat('es-ES', o).format(aFecha(s)));
+const fechaLarga = s => fmt(s, { weekday: 'long', day: 'numeric', month: 'long' });
+const fechaCorta = s => fmt(s, { day: 'numeric', month: 'short' });
+const fechaConDia = s => fmt(s, { weekday: 'short', day: 'numeric', month: 'short' });
+function fechaRelativa(s) {
+  const h = hoy();
+  if (s === h) return 'hoy';
+  if (s === sumarDias(h, 1)) return 'mañana';
+  if (s === sumarDias(h, -1)) return 'ayer';
+  return fechaConDia(s);
+}
+const cadaDe = f => Math.max(1, parseInt(f && f.cada, 10) || 1);
+const repite = t => !!(t.frecuencia && t.frecuencia.tipo && t.frecuencia.tipo !== 'una');
+const esMultidia = f => !!(f && f.tipo === 'semanas' && Array.isArray(f.dias) && f.dias.length > 1);
+
 /* Fecha de la repetición número i contando desde s (i=0 es s) */
 function paso(s, f, i) {
-  const n = Math.max(1, parseInt(f.cada, 10) || 1) * i;
+  const n = cadaDe(f) * i;
   switch (f.tipo) {
     case 'dias': return sumarDias(s, n);
     case 'semanas': return sumarDias(s, 7 * n);
@@ -223,48 +297,42 @@ function paso(s, f, i) {
     default: return i === 0 ? s : null;
   }
 }
-const lunesDe = s => { const d = aFecha(s); const w = (d.getDay() + 6) % 7; return sumarDias(s, -w); };
-const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
-const fmt = (s, o) => cap(new Intl.DateTimeFormat('es-ES', o).format(aFecha(s)));
-const fechaLarga = s => fmt(s, { weekday: 'long', day: 'numeric', month: 'long' });
-const fechaCorta = s => fmt(s, { day: 'numeric', month: 'short' });
-function fechaRelativa(s) {
-  const h = hoy();
-  if (s === h) return 'Hoy';
-  if (s === sumarDias(h, 1)) return 'Mañana';
-  if (s === sumarDias(h, -1)) return 'Ayer';
-  return fechaCorta(s);
+function textoFrecuencia(f, hasta) {
+  if (!f || !f.tipo || f.tipo === 'una') return 'No se repite';
+  const n = cadaDe(f);
+  let txt;
+  if (esMultidia(f)) {
+    const dias = [...f.dias].sort((a, b) => a - b).map(d => DIAS_CORTOS[d]).join(', ');
+    txt = (n === 1 ? 'Cada semana: ' : `Cada ${n} semanas: `) + dias;
+  } else {
+    const uno = { dias: 'Cada día', semanas: 'Cada semana', meses: 'Cada mes', anios: 'Cada año' };
+    const varios = { dias: 'días', semanas: 'semanas', meses: 'meses', anios: 'años' };
+    txt = n === 1 ? uno[f.tipo] : `Cada ${n} ${varios[f.tipo]}`;
+  }
+  return hasta ? `${txt}, hasta el ${fechaCorta(hasta)}` : txt;
 }
-function textoFrecuencia(f) {
-  if (!f || f.tipo === 'una') return 'Una vez';
-  const n = Math.max(1, parseInt(f.cada, 10) || 1);
-  const uno = { dias: 'Cada día', semanas: 'Cada semana', meses: 'Cada mes', anios: 'Cada año' };
-  const varios = { dias: 'días', semanas: 'semanas', meses: 'meses', anios: 'años' };
-  return n === 1 ? uno[f.tipo] : `Cada ${n} ${varios[f.tipo]}`;
-}
+const horaTexto = x => x.horaInicio ? (x.horaFin ? `${x.horaInicio}–${x.horaFin}` : x.horaInicio) : '';
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 /* ---------- Estado ---------- */
+let tabletGuardada = false;
+try { tabletGuardada = localStorage.getItem(CLAVE_TABLET) === '1'; } catch (e) { /* sin almacenamiento */ }
 const S = {
-  usuario: null, yo: null, tareas: [], categorias: [], registro: [],
-  vista: 'hoy', hoySolo: 'todas',
-  cal: { modo: 'semana', fecha: hoy(), persona: 'todos', categoria: 'todas' },
-  lista: { persona: 'todos', categoria: 'todas' },
-  hist: { persona: 'todos' },
-  error: null
+  usuario: null, yo: null, tareas: [], registro: [],
+  tablet: tabletGuardada,
+  vista: 'tablon',
+  cal: { modo: 'semana', fecha: hoy(), persona: 'todos' },
+  irA: hoy()
 };
 let FB = null, db = null, auth = null, desuscribir = [];
 
 const app = document.getElementById('app');
 const sheet = document.getElementById('sheet');
 const toastEl = document.getElementById('toast');
+const anchoTablet = window.matchMedia('(min-width: 900px)');
 
 /* ---------- Arranque de Firebase ---------- */
 async function iniciar() {
-  if (Object.values(firebaseConfig).some(v => v === 'PEGA_AQUI')) {
-    app.innerHTML = `<div class="acceso">${I.tejado}<h1>HomePlan</h1><p>Falta pegar el bloque firebaseConfig al principio del código de index.html.</p></div>`;
-    return;
-  }
   const base = `https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}`;
   try {
     const [a, au, fs] = await Promise.all([
@@ -274,7 +342,7 @@ async function iniciar() {
     ]);
     FB = { ...a, ...au, ...fs };
   } catch (e) {
-    app.innerHTML = `<div class="acceso">${I.tejado}<h1>HomePlan</h1><p>No se pudo cargar Firebase. Comprueba la conexión y que FIREBASE_VERSION coincide con la de la consola.</p></div>`;
+    app.innerHTML = `<div class="acceso">${I.tejado}<h1>HomePlan</h1><p>No se pudo cargar Firebase. Comprueba la conexión.</p></div>`;
     console.error(e);
     return;
   }
@@ -290,7 +358,7 @@ async function iniciar() {
   }
   FB.onAuthStateChanged(auth, usuario => {
     desuscribir.forEach(f => f()); desuscribir = [];
-    S.usuario = usuario; S.yo = null; S.error = null;
+    S.usuario = usuario; S.yo = null;
     if (!usuario) return pintarLogin();
     escucharPerfil();
   });
@@ -298,7 +366,7 @@ async function iniciar() {
 
 function pintarLogin(mensaje) {
   app.innerHTML = `<div class="acceso">${I.tejado}<h1>HomePlan</h1>
-    <p>Las tareas de casa, repartidas y al día.</p>
+    <p>Las tareas y planes de casa, repartidos y al día.</p>
     ${mensaje ? `<p class="rojo">${esc(mensaje)}</p>` : ''}
     <button class="btn" id="entrar">Entrar con Google</button></div>`;
   document.getElementById('entrar').onclick = async () => {
@@ -318,6 +386,7 @@ function sinAcceso() {
 function alError(e) {
   console.error(e);
   if (e && e.code === 'permission-denied') sinAcceso();
+  else avisar('No se pudo guardar. Revisa la conexión.');
 }
 
 function escucharPerfil() {
@@ -327,16 +396,15 @@ function escucharPerfil() {
       if (snap.metadata.fromCache) return;
       return pintarEleccion();
     }
-    const nuevo = snap.data().persona;
     const primera = !S.yo;
-    S.yo = nuevo;
+    S.yo = snap.data().persona;
     if (primera) escucharDatos(); else pintar();
   }, alError));
 }
 
 function pintarEleccion() {
   app.innerHTML = `<div class="acceso">${I.tejado}<h1>¿Quién eres?</h1>
-    <p>Solo se pregunta una vez en este dispositivo y cuenta.</p>
+    <p>Solo se pregunta una vez por cuenta. Si este dispositivo va a ser la tablet compartida, podrás marcarlo después en el menú de la cuenta.</p>
     <div class="eleccion">
       <button data-p="ivan" style="background:var(--ivan)">Iván</button>
       <button data-p="jen" style="background:var(--jen)">Jen</button>
@@ -351,22 +419,6 @@ function escucharDatos() {
     S.tareas = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     pintar();
   }, alError));
-  desuscribir.push(FB.onSnapshot(FB.collection(db, 'categorias'), snap => {
-    if (snap.empty && !snap.metadata.fromCache) {
-      CATEGORIAS_INICIALES.forEach(c =>
-        FB.setDoc(FB.doc(db, 'categorias', c.id), { nombre: c.nombre, color: c.color }, { merge: true }).catch(alError));
-    }
-    if (!snap.metadata.fromCache) {
-      // v1.5: pasar a tonos pastel las categorías que conservan su color original
-      snap.docs.forEach(d => {
-        const base = CATEGORIAS_INICIALES.find(c => c.id === d.id);
-        if (base && (d.data().color || '').toUpperCase() === base.antiguo)
-          FB.updateDoc(d.ref, { color: base.color }).catch(alError);
-      });
-    }
-    S.categorias = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
-    pintar();
-  }, alError));
   const q = FB.query(FB.collection(db, 'registro'), FB.orderBy('fecha', 'desc'), FB.limit(300));
   desuscribir.push(FB.onSnapshot(q, snap => {
     S.registro = snap.docs.map(d => {
@@ -375,76 +427,327 @@ function escucharDatos() {
     }).sort((a, b) => a.fecha === b.fecha ? b._ts - a._ts : (a.fecha < b.fecha ? 1 : -1));
     pintar();
   }, alError));
+  mantenerPantalla();
 }
 
-/* ---------- Lógica de tareas ---------- */
-const responsableEfectivo = t => t.responsable === 'alternar' ? (t.turno || 'ivan') : t.responsable;
-const esDe = (t, p) => { const r = responsableEfectivo(t); return r === p || r === 'ambos'; };
-const categoria = id => S.categorias.find(c => c.id === id) || { nombre: 'Sin categoría', color: '#9AA7AB' };
+/* ---------- Modelo: tareas y eventos ----------
+   Un elemento del tablón (colección "tareas") puede ser:
+   - tipo 'tarea': tiene check; "proxima" es la fecha de la vez pendiente.
+   - tipo 'evento': no tiene check; "proxima" es el día en que empieza.
+   frecuencia: { tipo: una|dias|semanas|meses|anios, cada, dias?: [0..6] (lunes=0, solo con 2 o más días) }
+   hasta: último día de la repetición (opcional)
+   excepciones: { 'AAAA-MM-DD' (fecha original): { borrada } | { fecha, nombre, horaInicio, horaFin, responsable, notas } } */
+const tipoDe = t => t.tipo === 'evento' ? 'evento' : 'tarea';
+const otro = p => p === 'ivan' ? 'jen' : 'ivan';
+const nombreQuien = k => k === 'ambos' ? 'Los dos' : (PERSONAS[k]?.nombre || '?');
+const siguienteTurno = (actual, quien) => quien === 'ambos' ? (actual || 'ivan') : otro(quien);
 const hizo = (r, p) => r.hechaPor === p || r.hechaPor === 'ambos';
-const nombreQuien = k => k === 'ambos' ? 'Iván y Jen' : (PERSONAS[k]?.nombre || '?');
-const opcionesQuien = sel => [...Object.entries(PERSONAS).map(([k, p]) => [k, p.nombre]), ['ambos', 'Los dos']]
-  .map(([k, n]) => `<option value="${k}"${k === sel ? ' selected' : ''}>${n}</option>`).join('');
-const siguienteTurno = (actual, quien) => quien === 'ambos' ? (actual || 'ivan') : (quien === 'ivan' ? 'jen' : 'ivan');
-const activas = () => S.tareas.filter(t => t.activa !== false && t.proxima);
-const hechasHoy = () => S.registro.filter(r => r.fecha === hoy());
 
-function pasaFiltro(t, f) {
-  if (f.persona && f.persona !== 'todos' && !esDe(t, f.persona)) return false;
-  if (f.categoria && f.categoria !== 'todas' && t.categoriaId !== f.categoria) return false;
-  return true;
-}
-function registroPasaFiltro(r, f) {
-  if (f.persona && f.persona !== 'todos' && !hizo(r, f.persona)) return false;
-  if (f.categoria && f.categoria !== 'todas' && r.categoriaId !== f.categoria) return false;
-  return true;
-}
-
-/* Repeticiones previstas entre dos fechas (a partir de la próxima fecha) */
-function ocurrencias(desde, hasta, filtro) {
-  const mapa = {};
-  const meter = (d, t, siguiente) => (mapa[d] ||= []).push({ t, siguiente });
-  for (const t of activas()) {
-    if (!pasaFiltro(t, filtro)) continue;
-    if (!t.frecuencia || t.frecuencia.tipo === 'una') {
-      if (t.proxima >= desde && t.proxima <= hasta) meter(t.proxima, t, true);
-      continue;
+/* Fechas de la serie (sin excepciones) entre desde y hasta, ambas incluidas */
+function fechasSerie(t, desde, hasta) {
+  const f = t.frecuencia, inicio = t.proxima, out = [];
+  if (!inicio) return out;
+  const lim = t.hasta && t.hasta < hasta ? t.hasta : hasta;
+  const ini = mayor(desde, inicio);
+  if (ini > lim) return out;
+  if (!repite(t)) { if (inicio >= desde && inicio <= lim) out.push(inicio); return out; }
+  const cada = cadaDe(f);
+  if (esMultidia(f)) {
+    const lun0 = lunesDe(inicio);
+    const dias = [...f.dias].map(Number).sort((a, b) => a - b);
+    let w = Math.floor(diasEntre(lun0, lunesDe(ini)) / 7);
+    w -= w % cada;
+    for (; ; w += cada) {
+      const lun = sumarDias(lun0, 7 * w);
+      if (lun > lim) break;
+      for (const di of dias) { const d = sumarDias(lun, di); if (d >= ini && d <= lim) out.push(d); }
     }
-    for (let i = 0; i < 800; i++) {
-      const d = paso(t.proxima, t.frecuencia, i);
-      if (!d || d > hasta) break;
-      if (d >= desde) meter(d, t, i === 0);
+    return out;
+  }
+  let i0;
+  if (f.tipo === 'dias' || f.tipo === 'semanas') i0 = Math.floor(diasEntre(inicio, ini) / (cada * (f.tipo === 'semanas' ? 7 : 1)));
+  else i0 = Math.floor(mesesEntre(inicio, ini) / (cada * (f.tipo === 'anios' ? 12 : 1)));
+  i0 = Math.max(0, i0 - 1);
+  for (let i = i0; i < i0 + 5000; i++) {
+    const d = paso(inicio, f, i);
+    if (!d || d > lim) break;
+    if (d >= ini) out.push(d);
+  }
+  return out;
+}
+const esFechaDeSerie = (t, d) => fechasSerie(t, d, d).includes(d);
+
+/* Veces del elemento que caen entre desde y hasta (con excepciones aplicadas) */
+function ocurrenciasDe(t, desde, hasta) {
+  const exc = t.excepciones || {};
+  const esTarea = tipoDe(t) === 'tarea';
+  const res = [];
+  const poner = orig => {
+    const x = exc[orig] || null;
+    if (x && x.borrada) return;
+    const fecha = (x && x.fecha) || orig;
+    if (fecha < desde || fecha > hasta) return;
+    res.push({ t, orig, fecha, x, actual: esTarea && orig === t.proxima });
+  };
+  for (const d of fechasSerie(t, desde, hasta)) if (!(exc[d] && exc[d].fecha)) poner(d);
+  for (const [orig, x] of Object.entries(exc)) {
+    if (!x || !x.fecha || x.borrada || x.fecha < desde || x.fecha > hasta) continue;
+    if (esFechaDeSerie(t, orig)) poner(orig);
+  }
+  return res;
+}
+
+/* La vez pendiente de una tarea */
+function ocurrenciaActual(t) {
+  if (!t || tipoDe(t) !== 'tarea' || t.activa === false || !t.proxima) return null;
+  const x = (t.excepciones || {})[t.proxima] || null;
+  const usable = x && !x.borrada ? x : null;
+  return { t, orig: t.proxima, fecha: (usable && usable.fecha) || t.proxima, x: usable, actual: true };
+}
+
+/* Datos efectivos de una vez concreta: la serie con los cambios de ese día */
+function datosOcc(o) {
+  const t = o.t, x = o.x || {};
+  const d = {
+    nombre: x.nombre ?? t.nombre,
+    horaInicio: x.horaInicio ?? (t.horaInicio || ''),
+    horaFin: x.horaFin ?? (t.horaFin || ''),
+    notas: x.notas ?? (t.notas || ''),
+    responsable: x.responsable || t.responsable || 'ambos',
+    turno: t.turno || 'ivan',
+    alternado: false
+  };
+  if (!x.responsable && t.responsable === 'alternar') {
+    // Previsión del turno: va cambiando en cada repetición desde la vez actual (o desde el inicio en eventos)
+    const idx = o.actual ? 0 : Math.max(0, fechasSerie(t, t.proxima, o.orig).length - 1);
+    d.responsable = idx % 2 === 0 ? (t.turno || 'ivan') : otro(t.turno || 'ivan');
+    d.alternado = true;
+  }
+  return d;
+}
+const quienDe = d => d.responsable === 'alternar' ? 'ivan' : d.responsable;
+
+/* Próxima fecha de una tarea al completarla el día "hecha".
+   modo 'hoy': la siguiente cuenta desde el día en que se hizo.
+   modo 'calendario': se mantiene el calendario original, saltando las fechas ya pasadas. */
+function siguienteFecha(t, hecha, modo) {
+  if (!repite(t)) return null;
+  let r;
+  if (modo === 'hoy' && !esMultidia(t.frecuencia)) r = paso(hecha, t.frecuencia, 1);
+  else r = primeraLibre(t, sumarDias(mayor(hecha, t.proxima), 1));
+  if (r && t.hasta && r > t.hasta) return null;
+  return r;
+}
+function primeraLibre(t, desde) {
+  const exc = t.excepciones || {};
+  let a = desde;
+  for (let k = 0; k < 12; k++) {
+    const b = sumarDias(a, 400);
+    for (const d of fechasSerie(t, a, b)) if (!(exc[d] && exc[d].borrada)) return d;
+    if (t.hasta && b >= t.hasta) return null;
+    a = sumarDias(b, 1);
+  }
+  return null;
+}
+/* Quita las excepciones que ya quedaron atrás */
+function excepcionesDesde(exc, desde) {
+  const r = {};
+  for (const [k, v] of Object.entries(exc || {})) if (k >= desde) r[k] = v;
+  return r;
+}
+
+/* ---------- Filtro por persona ---------- */
+const pasaPersona = q => S.cal.persona === 'todos' || q === S.cal.persona || q === 'ambos';
+const pasaRegistro = r => S.cal.persona === 'todos' || hizo(r, S.cal.persona);
+
+/* Todo lo que hay que pintar entre dos fechas, agrupado por día */
+function mapaTablon(desde, hasta) {
+  const h = hoy(), mapa = {};
+  const meter = (fecha, it) => (mapa[fecha] ||= []).push(it);
+  for (const t of S.tareas) {
+    if (tipoDe(t) === 'tarea' && t.activa === false) continue;
+    for (const o of ocurrenciasDe(t, desde, hasta)) {
+      if (o.actual && o.fecha < h) continue; // las atrasadas se muestran en el día de hoy
+      const d = datosOcc(o);
+      if (!pasaPersona(quienDe(d))) continue;
+      meter(o.fecha, { tipo: 'occ', o, d, hora: d.horaInicio });
     }
   }
+  if (h >= desde && h <= hasta) {
+    for (const t of S.tareas) {
+      const o = ocurrenciaActual(t);
+      if (!o || o.fecha >= h) continue;
+      const d = datosOcc(o);
+      if (!pasaPersona(quienDe(d))) continue;
+      meter(h, { tipo: 'occ', o, d, hora: '', atrasada: true });
+    }
+  }
+  for (const r of S.registro) {
+    if (r.fecha >= desde && r.fecha <= hasta && pasaRegistro(r)) meter(r.fecha, { tipo: 'reg', r, hora: r.horaInicio || '' });
+  }
+  for (const k in mapa) mapa[k].sort((a, b) =>
+    (b.atrasada ? 1 : 0) - (a.atrasada ? 1 : 0) || (a.hora || '').localeCompare(b.hora || '') ||
+    (a.tipo === 'reg' ? 1 : 0) - (b.tipo === 'reg' ? 1 : 0));
   return mapa;
 }
 
-function completar(id, boton, fecha, quien) {
-  const t = S.tareas.find(x => x.id === id);
-  if (!t) return;
-  if (boton) { boton.classList.add('lleno', 'pop'); }
-  const f = fecha || hoy();
-  const hechaPor = quien || S.yo;
-  const lote = FB.writeBatch(db);
-  const refReg = FB.doc(FB.collection(db, 'registro'));
-  lote.set(refReg, {
-    tareaId: id, nombre: t.nombre, categoriaId: t.categoriaId || null,
-    hechaPor, prevista: t.proxima, fecha: f, ts: FB.serverTimestamp()
-  });
-  const antes = { proxima: t.proxima, activa: t.activa !== false, turno: t.turno || null };
-  const cambios = {};
-  if (!t.frecuencia || t.frecuencia.tipo === 'una') cambios.activa = false;
-  else cambios.proxima = paso(f, t.frecuencia, 1); // la siguiente cuenta desde el día en que se hace
-  if (t.responsable === 'alternar') cambios.turno = siguienteTurno(t.turno, hechaPor);
-  lote.update(FB.doc(db, 'tareas', id), cambios);
-  lote.commit().catch(alError);
-  avisar(f === hoy() ? `${t.nombre}: hecha` : `${t.nombre}: hecha el ${fechaCorta(f)}`, 'Deshacer', () => {
-    const l = FB.writeBatch(db);
-    l.delete(refReg);
-    l.update(FB.doc(db, 'tareas', id), antes);
-    l.commit().catch(alError);
-  });
+/* ---------- Tarjetas ---------- */
+function etiquetaQuien(d) {
+  const q = quienDe(d);
+  return `<span class="quien">${nombreQuien(q)}${d.alternado ? ' (turno)' : ''}</span>`;
 }
+function tarjetaOcc(it) {
+  const { o, d } = it, t = o.t, q = quienDe(d), h = hoy();
+  const esTarea = tipoDe(t) === 'tarea';
+  let izq;
+  if (esTarea && o.actual) izq = `<button class="check" data-completar="${t.id}" aria-label="Marcar ${esc(d.nombre)} como hecha">${I.ok}</button>`;
+  else if (esTarea) izq = `<span class="check futuro" aria-hidden="true"></span>`;
+  else izq = `<span class="ev-ico" aria-hidden="true">${I.cal}</span>`;
+  const pasado = !esTarea && o.fecha < h;
+  const hora = horaTexto(d);
+  return `<div class="tarjeta p-${q}${it.atrasada ? ' atrasada' : ''}${pasado ? ' pasado' : ''}">${izq}
+    <div class="info" data-occ="${t.id}" data-orig="${o.orig}">
+      <div class="nombre">${esc(d.nombre)}</div>
+      <div class="meta">${hora ? `<span class="hora">${hora}</span>` : ''}${etiquetaQuien(d)}${repite(t) ? '<span title="Se repite">↻</span>' : ''}${it.atrasada ? `<span class="rojo">Tocaba ${fechaRelativa(o.fecha)}</span>` : ''}</div>
+    </div></div>`;
+}
+function tarjetaReg(r) {
+  const hora = horaTexto(r);
+  return `<div class="tarjeta hecha p-${r.hechaPor in PERSONAS || r.hechaPor === 'ambos' ? r.hechaPor : 'ambos'}">
+    <span class="check lleno" aria-hidden="true">${I.ok}</span>
+    <div class="info" data-registro="${r.id}"><div class="nombre">${esc(r.nombre)}</div>
+    <div class="meta">${hora ? `<span class="hora">${hora}</span>` : ''}<span>Hecha por ${nombreQuien(r.hechaPor)}</span>${r.prevista && r.prevista < r.fecha ? `<span>tocaba ${fechaCorta(r.prevista)}</span>` : ''}</div></div></div>`;
+}
+const tarjeta = it => it.tipo === 'reg' ? tarjetaReg(it.r) : tarjetaOcc(it);
+
+/* ---------- Pantalla: Tablón ---------- */
+function resumenHoy() {
+  const h = hoy();
+  const pend = S.tareas.map(ocurrenciaActual).filter(o => o && o.fecha <= h && pasaPersona(quienDe(datosOcc(o))));
+  const atrasadas = pend.filter(o => o.fecha < h).length;
+  const hechas = S.registro.filter(r => r.fecha === h && pasaRegistro(r)).length;
+  const total = pend.length + hechas;
+  const partes = [total ? `Hoy: ${hechas} de ${total} tareas hechas` : 'Hoy no hay tareas pendientes'];
+  if (atrasadas) partes.push(`<span class="rojo">${atrasadas} atrasada${atrasadas > 1 ? 's' : ''}</span>`);
+  return partes.map(p => `<span>${p}</span>`).join('');
+}
+
+function vistaTablon() {
+  const c = S.cal, h = hoy(), ahora = new Date();
+  let titulo, cuerpo = '';
+  if (c.modo === 'semana') {
+    const ini = lunesDe(c.fecha), fin = sumarDias(ini, 6);
+    titulo = `${fechaCorta(ini)} – ${fechaCorta(fin)}`;
+    const mapa = mapaTablon(ini, fin);
+    for (let i = 0; i < 7; i++) {
+      const d = sumarDias(ini, i);
+      const items = mapa[d] || [];
+      cuerpo += `<section class="dia-col${d === h ? ' es-hoy' : ''}" id="d-${d}">
+        <h3><span><span class="corto">${fmt(d, { weekday: 'short' }).replace('.', '')} ${aFecha(d).getDate()}</span><span class="largo">${fechaLarga(d)}</span>${d === h ? ' · Hoy' : ''}</span>
+          <button class="mas-dia" data-nuevo-dia="${d}" aria-label="Añadir el ${fechaLarga(d)}">${I.mas}</button></h3>
+        ${items.length ? `<div class="lista">${items.map(tarjeta).join('')}</div>` : '<p class="libre">Libre</p>'}</section>`;
+    }
+    cuerpo = `<div class="semana">${cuerpo}</div>`;
+  } else {
+    const f = aFecha(c.fecha);
+    const primero = ymd(new Date(f.getFullYear(), f.getMonth(), 1));
+    const ultimo = ymd(new Date(f.getFullYear(), f.getMonth() + 1, 0));
+    titulo = cap(new Intl.DateTimeFormat('es-ES', { month: 'long', year: 'numeric' }).format(f));
+    const ini = lunesDe(primero), fin = sumarDias(lunesDe(ultimo), 6);
+    const mapa = mapaTablon(ini, fin);
+    let celdas = DIAS_CORTOS.map(x => `<div class="dsem">${x}</div>`).join('');
+    for (let d = ini; d <= fin; d = sumarDias(d, 1)) {
+      const items = mapa[d] || [];
+      const marcas = items.map(it => it.tipo === 'reg'
+        ? `<span class="mini ok p-${it.r.hechaPor}">${esc(it.r.nombre)}</span>`
+        : `<span class="mini p-${quienDe(it.d)}">${it.d.horaInicio ? it.d.horaInicio + ' ' : ''}${esc(it.d.nombre)}</span>`);
+      const max = anchoTablet.matches ? 4 : 6;
+      const visibles = marcas.slice(0, max).join('') + (marcas.length > max ? `<span class="mas">+${marcas.length - max}</span>` : '');
+      celdas += `<button class="celda${d < primero || d > ultimo ? ' fuera' : ''}${d === h ? ' es-hoy' : ''}" data-dia="${d}" aria-label="${fechaLarga(d)}, ${items.length} cosas">
+        <span class="num">${aFecha(d).getDate()}</span><span class="marcas">${visibles}</span></button>`;
+    }
+    cuerpo = `<div class="mes">${celdas}</div><p class="nota">Toca un día para ver su semana.</p>`;
+  }
+  return `<section class="tablon-cab">
+      <div><p class="dia">${cap(new Intl.DateTimeFormat('es-ES', { weekday: 'long', day: 'numeric', month: 'long' }).format(ahora))}</p>
+        <span class="reloj" id="reloj">${pad(ahora.getHours())}:${pad(ahora.getMinutes())}</span></div>
+      <div class="resumen">${resumenHoy()}</div>
+    </section>
+    <div class="controles">
+      <div class="seg" role="group" aria-label="Vista">
+        <button data-modo="semana" aria-pressed="${c.modo === 'semana'}">Semana</button>
+        <button data-modo="mes" aria-pressed="${c.modo === 'mes'}">Mes</button>
+      </div>
+      <div class="seg" role="group" aria-label="Persona">
+        ${[['todos', 'Todos'], ['ivan', 'Iván'], ['jen', 'Jen']].map(([k, n]) => `<button data-persona="${k}" aria-pressed="${c.persona === k}">${n}</button>`).join('')}
+      </div>
+      <div class="nav-fecha">
+        <button class="icono" data-mover="-1" aria-label="Anterior">${I.izq}</button>
+        <div class="tit">${titulo}</div>
+        <button class="icono" data-mover="1" aria-label="Siguiente">${I.der}</button>
+        <button class="btn sec peq" data-irhoy>Hoy</button>
+        <button class="icono" data-todo aria-label="Ver todas las tareas y eventos">${I.lista}</button>
+      </div>
+    </div>
+    ${cuerpo}`;
+}
+
+const vistaProximamente = nombre => `<div class="vacio grande">${nombre} llega en la próxima actualización (v1.7).</div>`;
+
+/* ---------- Pintado general ---------- */
+const PESTANAS = [['tablon', 'Tablón', I.cal], ['pelis', 'Películas y series', I.peli], ['compra', 'Compra', I.carro]];
+function pintar() {
+  if (!S.usuario || !S.yo) return;
+  const vistas = {
+    tablon: vistaTablon,
+    pelis: () => vistaProximamente('Películas y series'),
+    compra: () => vistaProximamente('La lista de la compra')
+  };
+  const scroll = window.scrollY;
+  const quien = S.tablet ? 'Tablet' : PERSONAS[S.yo].nombre;
+  app.innerHTML = `<header class="top"><div class="marca">${I.tejado}HomePlan<span class="ver">v${VERSION_APP}</span></div>
+      <button class="yo" data-cuenta>${quien}</button></header>
+    <main>${vistas[S.vista]()}</main>
+    ${S.vista === 'tablon' ? `<button class="fab" data-nueva aria-label="Añadir tarea o evento">${I.mas}</button>` : ''}
+    <nav class="tabs"><div class="in">${PESTANAS.map(([k, n, ic]) =>
+      `<button data-vista="${k}"${S.vista === k ? ' aria-current="page"' : ''}>${ic}<span>${n}</span></button>`).join('')}</div></nav>`;
+  if (S.irA && S.vista === 'tablon') {
+    const destino = document.getElementById('d-' + S.irA);
+    S.irA = null;
+    if (destino && !anchoTablet.matches) { destino.scrollIntoView({ block: 'start' }); return; }
+  }
+  window.scrollTo(0, scroll);
+}
+
+/* ---------- Eventos de la interfaz ---------- */
+const ACCIONES = '[data-cerrar],[data-completar],[data-occ],[data-registro],[data-editar],[data-vista],[data-modo],[data-persona],[data-mover],[data-irhoy],[data-dia],[data-nueva],[data-nuevo-dia],[data-cuenta],[data-todo]';
+document.addEventListener('click', e => {
+  ultimaInteraccion = Date.now();
+  if (e.target === sheet) return cerrarHoja();
+  const el = e.target.closest(ACCIONES);
+  if (!el || !(app.contains(el) || sheet.contains(el))) return;
+  const d = el.dataset;
+  if ('cerrar' in d) return cerrarHoja();
+  if (d.completar) { const t = buscar(d.completar); return t && hojaCompletar(t, el.classList.contains('check') ? el : null); }
+  if (d.occ) return fichaOcurrencia(buscar(d.occ), d.orig);
+  if (d.registro) return formularioRegistro(S.registro.find(r => r.id === d.registro));
+  if (d.editar) return formularioElemento(buscar(d.editar));
+  if (d.vista) { S.vista = d.vista; window.scrollTo(0, 0); return pintar(); }
+  if (d.modo) { S.cal.modo = d.modo; return pintar(); }
+  if (d.persona) { S.cal.persona = d.persona; return pintar(); }
+  if ('irhoy' in d) { S.cal.fecha = hoy(); S.irA = hoy(); return pintar(); }
+  if (d.dia) { S.cal.fecha = d.dia; S.cal.modo = 'semana'; S.irA = d.dia; window.scrollTo(0, 0); return pintar(); }
+  if ('nueva' in d) return formularioElemento(null);
+  if (d.nuevoDia) return formularioElemento(null, d.nuevoDia);
+  if ('cuenta' in d) return menuCuenta();
+  if ('todo' in d) return hojaTodo();
+  if (d.mover) {
+    const n = parseInt(d.mover, 10), c = S.cal;
+    c.fecha = c.modo === 'semana' ? sumarDias(c.fecha, 7 * n) : sumarMeses(c.fecha, n);
+    return pintar();
+  }
+});
+const buscar = id => S.tareas.find(t => t.id === id);
 
 /* ---------- Aviso con deshacer ---------- */
 let temporizadorAviso = null;
@@ -453,342 +756,310 @@ function avisar(texto, accion, alPulsar) {
   toastEl.innerHTML = `<span>${esc(texto)}</span>${accion ? `<button>${esc(accion)}</button>` : ''}`;
   toastEl.classList.remove('hidden');
   if (accion) toastEl.querySelector('button').onclick = () => { alPulsar(); toastEl.classList.add('hidden'); };
-  temporizadorAviso = setTimeout(() => toastEl.classList.add('hidden'), 6000);
+  temporizadorAviso = setTimeout(() => toastEl.classList.add('hidden'), 7000);
 }
-
-/* ---------- Piezas de interfaz ---------- */
-function etiquetaPersona(t) {
-  const r = responsableEfectivo(t);
-  if (r === 'ambos') return `<span class="persona" style="--p:var(--menta)">Ambos</span>`;
-  const p = PERSONAS[r]; if (!p) return '';
-  const extra = t.responsable === 'alternar' ? ' (turno)' : '';
-  return `<span class="persona" style="--p:${p.color}">${p.nombre}${extra}</span>`;
-}
-function filaTarea(t, fecha, { siguiente = true, mostrarFecha = false } = {}) {
-  const c = categoria(t.categoriaId);
-  const atrasada = siguiente && fecha < hoy();
-  const check = siguiente
-    ? `<button class="check" data-completar="${t.id}" aria-label="Marcar ${esc(t.nombre)} como hecha">${I.ok}</button>`
-    : `<span class="check futuro" aria-hidden="true"></span>`;
-  return `<div class="fila${atrasada ? ' atrasada' : ''}">${check}
-    <div class="info" data-editar="${t.id}">
-      <div class="nombre">${esc(t.nombre)}</div>
-      <div class="meta"><span class="cat" style="--c:${esc(c.color)}">${esc(c.nombre)}</span>${etiquetaPersona(t)}<span>${textoFrecuencia(t.frecuencia)}</span>
-      ${mostrarFecha ? `<span class="${atrasada ? 'rojo' : ''}">${atrasada ? 'Tocaba ' : ''}${fechaRelativa(fecha)}</span>` : ''}</div>
-    </div></div>`;
-}
-function filaHecha(r) {
-  const c = categoria(r.categoriaId);
-  return `<div class="fila hecha"><span class="check lleno" aria-hidden="true">${I.ok}</span>
-    <div class="info" data-registro="${r.id}"><div class="nombre">${esc(r.nombre)}</div>
-    <div class="meta"><span class="cat" style="--c:${esc(c.color)}">${esc(c.nombre)}</span>
-    <span>Hecha por ${nombreQuien(r.hechaPor)}${r.prevista && r.prevista < r.fecha ? `, tocaba ${fechaCorta(r.prevista)}` : ''}</span></div></div></div>`;
-}
-const listaHTML = (items, vacio) => items.length ? `<div class="lista">${items.join('')}</div>` : `<div class="vacio">${vacio}</div>`;
-const opcionesPersona = sel => `<option value="todos"${sel === 'todos' ? ' selected' : ''}>Todos</option>` +
-  Object.entries(PERSONAS).map(([k, p]) => `<option value="${k}"${sel === k ? ' selected' : ''}>${p.nombre}</option>`).join('');
-const opcionesCategoria = sel => `<option value="todas">Todas las categorías</option>` +
-  S.categorias.map(c => `<option value="${c.id}"${sel === c.id ? ' selected' : ''}>${esc(c.nombre)}</option>`).join('');
-
-/* ---------- Pantallas ---------- */
-function vistaHoy() {
-  const h = hoy();
-  const filtro = S.hoySolo === 'mias' ? { persona: S.yo } : {};
-  const pend = activas().filter(t => t.proxima <= h && pasaFiltro(t, filtro)).sort((a, b) => a.proxima.localeCompare(b.proxima));
-  const atrasadas = pend.filter(t => t.proxima < h);
-  const deHoy = pend.filter(t => t.proxima === h);
-  const hechas = hechasHoy().filter(r => S.hoySolo !== 'mias' || hizo(r, S.yo));
-  const total = pend.length + hechas.length;
-  const pct = total ? Math.round(hechas.length / total * 100) : 0;
-  const d = new Date();
-  return `<section class="hoy-cab">
-      <p class="dia">${cap(new Intl.DateTimeFormat('es-ES', { weekday: 'long' }).format(d))}</p>
-      <p class="fecha">${cap(new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'long', year: 'numeric' }).format(d))}</p>
-      <div class="barra" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
-      <div class="cuenta">${total ? `${hechas.length} de ${total} hechas` : 'Hoy no toca nada'}</div>
-    </section>
-    <div class="seg" role="group" aria-label="Qué tareas ver">
-      <button data-hoy="todas" aria-pressed="${S.hoySolo === 'todas'}">De los dos</button>
-      <button data-hoy="mias" aria-pressed="${S.hoySolo === 'mias'}">Solo mías</button>
-    </div>
-    ${atrasadas.length ? `<h2>Atrasadas <span class="n">${atrasadas.length}</span></h2>${listaHTML(atrasadas.map(t => filaTarea(t, t.proxima, { mostrarFecha: true })), '')}` : ''}
-    <h2>Para hoy <span class="n">${deHoy.length}</span></h2>
-    ${listaHTML(deHoy.map(t => filaTarea(t, t.proxima)), 'Nada pendiente para hoy.')}
-    ${hechas.length ? `<h2>Hechas hoy <span class="n">${hechas.length}</span></h2>${listaHTML(hechas.map(filaHecha), '')}` : ''}`;
-}
-
-function itemsDia(fecha, mapa, filtroReg) {
-  const h = hoy();
-  const items = [];
-  if (fecha === h) {
-    activas().filter(t => t.proxima < h && pasaFiltro(t, S.cal)).forEach(t => items.push(filaTarea(t, t.proxima, { mostrarFecha: true })));
-  }
-  (mapa[fecha] || []).forEach(o => items.push(filaTarea(o.t, fecha, { siguiente: o.siguiente })));
-  S.registro.filter(r => r.fecha === fecha && registroPasaFiltro(r, filtroReg)).forEach(r => items.push(filaHecha(r)));
-  return items;
-}
-
-function vistaCalendario() {
-  const c = S.cal, h = hoy();
-  const filtroReg = { persona: c.persona, categoria: c.categoria };
-  let titulo = '', cuerpo = '';
-  if (c.modo === 'dia') {
-    titulo = fechaLarga(c.fecha);
-    const mapa = ocurrencias(c.fecha, c.fecha, c);
-    cuerpo = listaHTML(itemsDia(c.fecha, mapa, filtroReg), 'Nada este día.');
-  } else if (c.modo === 'semana') {
-    const ini = lunesDe(c.fecha), fin = sumarDias(ini, 6);
-    titulo = `${fechaCorta(ini)} a ${fechaCorta(fin)}`;
-    const mapa = ocurrencias(ini, fin, c);
-    for (let i = 0; i < 7; i++) {
-      const d = sumarDias(ini, i);
-      const items = itemsDia(d, mapa, filtroReg);
-      cuerpo += `<div class="semana-dia"><h3 class="${d === h ? 'es-hoy' : ''}">${fechaLarga(d)}</h3>${listaHTML(items, 'Libre.')}</div>`;
-    }
-  } else {
-    const f = aFecha(c.fecha);
-    const primero = ymd(new Date(f.getFullYear(), f.getMonth(), 1));
-    const ultimo = ymd(new Date(f.getFullYear(), f.getMonth() + 1, 0));
-    titulo = cap(new Intl.DateTimeFormat('es-ES', { month: 'long', year: 'numeric' }).format(f));
-    const ini = lunesDe(primero), fin = sumarDias(lunesDe(ultimo), 6);
-    const mapa = ocurrencias(ini, fin, c);
-    let celdas = ['L', 'M', 'X', 'J', 'V', 'S', 'D'].map(x => `<div class="dsem">${x}</div>`).join('');
-    for (let d = ini; d <= fin; d = sumarDias(d, 1)) {
-      const prev = (mapa[d] || []).map(o => `<span class="m" style="--c:${esc(categoria(o.t.categoriaId).color)}"></span>`);
-      const hechas = S.registro.filter(r => r.fecha === d && registroPasaFiltro(r, filtroReg))
-        .map(r => `<span class="m ok" style="--c:${esc(categoria(r.categoriaId).color)}"></span>`);
-      const todas = [...hechas, ...prev];
-      const visibles = todas.slice(0, 6).join('') + (todas.length > 6 ? `<span class="mas">+${todas.length - 6}</span>` : '');
-      celdas += `<button class="celda${d < primero || d > ultimo ? ' fuera' : ''}${d === h ? ' es-hoy' : ''}" data-dia="${d}" aria-label="${fechaLarga(d)}, ${todas.length} tareas">
-        <span class="num">${aFecha(d).getDate()}</span><span class="marcas">${visibles}</span></button>`;
-    }
-    cuerpo = `<div class="mes">${celdas}</div><p style="color:var(--tinta-suave);font-size:.85rem">Los puntos con borde verde son tareas hechas. Toca un día para ver el detalle.</p>`;
-  }
-  return `<div class="seg" role="group" aria-label="Vista del calendario" style="margin-top:10px">
-      ${['dia', 'semana', 'mes'].map(m => `<button data-modo="${m}" aria-pressed="${c.modo === m}">${{ dia: 'Día', semana: 'Semana', mes: 'Mes' }[m]}</button>`).join('')}
-    </div>
-    <div class="filtros">
-      <select data-calfiltro="persona" aria-label="Filtrar por persona">${opcionesPersona(c.persona)}</select>
-      <select data-calfiltro="categoria" aria-label="Filtrar por categoría">${opcionesCategoria(c.categoria)}</select>
-    </div>
-    <div class="cal-nav">
-      <button class="icono" data-mover="-1" aria-label="Anterior">${I.izq}</button>
-      <div class="tit">${titulo}</div>
-      <button class="icono" data-mover="1" aria-label="Siguiente">${I.der}</button>
-    </div>
-    <button class="btn sec" data-irhoy style="padding:6px 12px;margin-bottom:10px">Ir a hoy</button>
-    ${cuerpo}`;
-}
-
-function vistaTareas() {
-  const f = S.lista;
-  const lista = S.tareas.filter(t => pasaFiltro(t, f)).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
-  const act = lista.filter(t => t.activa !== false), fin = lista.filter(t => t.activa === false);
-  return `<div class="filtros" style="margin-top:12px">
-      <select data-listafiltro="persona" aria-label="Filtrar por persona">${opcionesPersona(f.persona)}</select>
-      <select data-listafiltro="categoria" aria-label="Filtrar por categoría">${opcionesCategoria(f.categoria)}</select>
-    </div>
-    <button class="btn sec ancho" data-categorias>Gestionar categorías</button>
-    <h2>Activas <span class="n">${act.length}</span></h2>
-    ${listaHTML(act.map(t => filaTarea(t, t.proxima, { mostrarFecha: true })), 'Aún no hay tareas. Crea la primera con el botón amarillo.')}
-    ${fin.length ? `<h2>Terminadas (de una sola vez) <span class="n">${fin.length}</span></h2>
-      <div class="lista">${fin.map(t => `<div class="fila hecha"><span class="check lleno" aria-hidden="true">${I.ok}</span><div class="info" data-editar="${t.id}"><div class="nombre">${esc(t.nombre)}</div></div></div>`).join('')}</div>` : ''}`;
-}
-
-function vistaHistorial() {
-  const regs = S.registro.filter(r => registroPasaFiltro(r, S.hist));
-  let html = `<div class="filtros" style="margin-top:12px"><select data-histfiltro="persona" aria-label="Filtrar por persona">${opcionesPersona(S.hist.persona)}</select></div>`;
-  if (!regs.length) return html + `<div class="vacio">Todavía no hay tareas hechas.</div>`;
-  let dia = null;
-  for (const r of regs) {
-    if (r.fecha !== dia) { if (dia) html += '</div>'; dia = r.fecha; html += `<h2>${fechaLarga(dia)}</h2><div class="lista">`; }
-    html += filaHecha(r);
-  }
-  html += '</div>';
-  const cuenta = p => regs.filter(r => r.hechaPor === p).length;
-  const juntos = regs.filter(r => r.hechaPor === 'ambos').length;
-  html += `<p style="color:var(--tinta-suave);font-size:.85rem;margin-top:18px">Se muestran los últimos ${S.registro.length} registros. Iván: ${cuenta('ivan')}, Jen: ${cuenta('jen')}, juntos: ${juntos}.</p>`;
-  return html;
-}
-
-/* ---------- Pintado general ---------- */
-const PESTANAS = [
-  ['hoy', 'Hoy', I.hoy], ['calendario', 'Calendario', I.cal],
-  ['tareas', 'Tareas', I.lista], ['historial', 'Historial', I.hist]
-];
-function pintar() {
-  if (!S.usuario || !S.yo) return;
-  const vistas = { hoy: vistaHoy, calendario: vistaCalendario, tareas: vistaTareas, historial: vistaHistorial };
-  const p = PERSONAS[S.yo];
-  const scroll = window.scrollY;
-  app.innerHTML = `<header class="top"><div class="marca">${I.tejado}HomePlan<span class="ver">v${VERSION_APP}</span></div>
-      <button class="yo" data-cuenta style="color:${p.color}">${p.nombre}</button></header>
-    <main>${vistas[S.vista]()}</main>
-    <button class="fab" data-nueva aria-label="Nueva tarea">${I.mas}</button>
-    <nav class="tabs"><div class="in">${PESTANAS.map(([k, n, ic]) =>
-      `<button data-vista="${k}"${S.vista === k ? ' aria-current="page"' : ''}>${ic}<span>${n}</span></button>`).join('')}</div></nav>`;
-  window.scrollTo(0, scroll);
-}
-
-/* ---------- Eventos ---------- */
-app.addEventListener('click', e => {
-  const el = e.target.closest('button, [data-editar], [data-registro]');
-  if (!el) return;
-  const d = el.dataset;
-  if (d.completar) {
-    const t = S.tareas.find(x => x.id === d.completar);
-    return t && t.responsable === 'ambos' ? elegirQuien(t, el) : completar(d.completar, el);
-  }
-  if (d.editar) return formularioTarea(S.tareas.find(t => t.id === d.editar));
-  if (d.registro) return formularioRegistro(S.registro.find(r => r.id === d.registro));
-  if (d.vista) { S.vista = d.vista; window.scrollTo(0, 0); return pintar(); }
-  if (d.hoy) { S.hoySolo = d.hoy; return pintar(); }
-  if ('nueva' in d) return formularioTarea(null);
-  if ('categorias' in d) return formularioCategorias();
-  if ('cuenta' in d) return menuCuenta();
-  if (d.modo) { S.cal.modo = d.modo; return pintar(); }
-  if ('irhoy' in d) { S.cal.fecha = hoy(); return pintar(); }
-  if (d.dia) { S.cal.fecha = d.dia; S.cal.modo = 'dia'; return pintar(); }
-  if (d.mover) {
-    const n = parseInt(d.mover, 10), c = S.cal;
-    c.fecha = c.modo === 'dia' ? sumarDias(c.fecha, n) : c.modo === 'semana' ? sumarDias(c.fecha, 7 * n) : sumarMeses(c.fecha, n);
-    return pintar();
-  }
-});
-app.addEventListener('change', e => {
-  const d = e.target.dataset;
-  if (d.calfiltro) S.cal[d.calfiltro] = e.target.value;
-  else if (d.listafiltro) S.lista[d.listafiltro] = e.target.value;
-  else if (d.histfiltro) S.hist[d.histfiltro] = e.target.value;
-  else return;
-  pintar();
-});
 
 /* ---------- Hojas inferiores ---------- */
 function abrirHoja(html) {
   sheet.innerHTML = `<div class="panel">${html}</div>`;
   sheet.classList.remove('hidden');
+  sheet.querySelector('.panel').scrollTop = 0;
   document.body.style.overflow = 'hidden';
 }
 function cerrarHoja() { sheet.classList.add('hidden'); sheet.innerHTML = ''; document.body.style.overflow = ''; }
-sheet.addEventListener('click', e => { if (e.target === sheet || e.target.closest('[data-cerrar]')) cerrarHoja(); });
-
-function formularioTarea(t) {
-  const nueva = !t;
-  const v = t || { nombre: '', categoriaId: S.categorias[0]?.id || '', responsable: S.yo, turno: S.yo,
-    frecuencia: { tipo: 'semanas', cada: 1 }, proxima: hoy(), notas: '', activa: true };
-  const fr = v.frecuencia || { tipo: 'una', cada: 1 };
-  const resp = [['ivan', 'Iván'], ['jen', 'Jen'], ['ambos', 'Ambos'], ['alternar', 'Alternar']];
-  abrirHoja(`<h3>${nueva ? 'Nueva tarea' : 'Editar tarea'}</h3>
-    <div class="campo"><label for="f-nombre">Nombre</label><input type="text" id="f-nombre" value="${esc(v.nombre)}" placeholder="Limpiar ventanas" maxlength="80"></div>
-    <div class="campo"><label for="f-cat">Categoría</label><select id="f-cat">${S.categorias.map(c => `<option value="${c.id}"${v.categoriaId === c.id ? ' selected' : ''}>${esc(c.nombre)}</option>`).join('')}</select></div>
-    <div class="campo"><span class="lbl">Quién la hace</span>
-      <div class="seg" id="f-resp">${resp.map(([k, n]) => `<button type="button" data-r="${k}" aria-pressed="${v.responsable === k}">${n}</button>`).join('')}</div></div>
-    <div class="campo${v.responsable === 'alternar' ? '' : ' hidden'}" id="f-turno-c"><label for="f-turno">Le toca ahora a</label>
-      <select id="f-turno"><option value="ivan"${(v.turno || 'ivan') === 'ivan' ? ' selected' : ''}>Iván</option><option value="jen"${v.turno === 'jen' ? ' selected' : ''}>Jen</option></select></div>
-    <div class="campo"><span class="lbl">Frecuencia</span>
-      <div class="fila2"><select id="f-tipo" aria-label="Tipo de frecuencia">
-        ${[['una', 'Una vez'], ['dias', 'Días'], ['semanas', 'Semanas'], ['meses', 'Meses'], ['anios', 'Años']].map(([k, n]) => `<option value="${k}"${fr.tipo === k ? ' selected' : ''}>${n}</option>`).join('')}
-      </select><input type="number" id="f-cada" min="1" max="365" value="${esc(fr.cada || 1)}" aria-label="Cada cuántos"${fr.tipo === 'una' ? ' disabled' : ''}></div>
-      <p id="f-freq-txt" style="margin:6px 0 0;color:var(--tinta-suave);font-size:.88rem">${textoFrecuencia(fr)}</p></div>
-    <div class="campo"><label for="f-fecha">${nueva ? 'Primera vez' : 'Próxima vez'}</label><input type="date" id="f-fecha" value="${esc(v.proxima || hoy())}"></div>
-    <div class="campo"><label for="f-notas">Notas</label><textarea id="f-notas" placeholder="Opcional">${esc(v.notas || '')}</textarea></div>
-    ${!nueva && v.activa !== false ? `<div class="campo" style="background:var(--menta-suave);border-radius:var(--radio);padding:12px">
-      <span class="lbl">¿Ya está hecha y se olvidó marcar?</span>
-      <div class="fila2"><input type="date" id="h-fecha" value="${hoy()}" max="${hoy()}" aria-label="Día en que se hizo">
-        <select id="h-quien" aria-label="Quién la hizo">${opcionesQuien(v.responsable === 'ambos' ? 'ambos' : S.yo)}</select></div>
-      <button class="btn ancho" id="h-marcar" style="margin-top:8px;background:var(--menta);color:#fff">Marcar como hecha ese día</button>
-      <p style="margin:6px 0 0;color:var(--tinta-suave);font-size:.85rem">La siguiente vez se calcula desde el día que elijas.</p></div>` : ''}
-    ${!nueva && v.activa === false ? `<p style="color:var(--tinta-suave)">Esta tarea de una sola vez ya está hecha. Al guardar vuelve a quedar pendiente.</p>` : ''}
-    <div class="acciones"><button class="btn sec" data-cerrar>Cancelar</button><button class="btn" id="f-guardar">Guardar</button></div>
-    ${nueva ? '' : `<button class="btn peligro ancho" id="f-borrar" style="margin-top:10px">Borrar tarea</button>`}`);
-
-  let responsable = v.responsable;
-  const $ = s => sheet.querySelector(s);
-  $('#f-resp').onclick = e => {
+const $ = s => sheet.querySelector(s);
+const segQuien = (id, sel, conAlternar) => `<div class="seg" id="${id}">${[['ivan', 'Iván'], ['jen', 'Jen'], ['ambos', 'Los dos'], ...(conAlternar ? [['alternar', 'Alternar']] : [])]
+  .map(([k, n]) => `<button type="button" data-r="${k}" aria-pressed="${sel === k}">${n}</button>`).join('')}</div>`;
+function activarSeg(id, alCambiar) {
+  $('#' + id).onclick = e => {
     const b = e.target.closest('[data-r]'); if (!b) return;
-    responsable = b.dataset.r;
-    sheet.querySelectorAll('#f-resp button').forEach(x => x.setAttribute('aria-pressed', x === b));
+    sheet.querySelectorAll(`#${id} button`).forEach(x => x.setAttribute('aria-pressed', x === b));
+    alCambiar(b.dataset.r);
+  };
+}
+
+/* ---- Marcar una tarea como hecha ---- */
+function hojaCompletar(t, boton) {
+  const o = ocurrenciaActual(t);
+  if (!o) return;
+  const d = datosOcc(o);
+  const orden = S.tablet ? ['ivan', 'jen', 'ambos'] : [S.yo, otro(S.yo), 'ambos'];
+  abrirHoja(`<h3>${esc(d.nombre)}</h3>
+    <p class="sub">${o.fecha < hoy() ? `<span class="rojo">Tocaba ${fechaRelativa(o.fecha)}</span>` : `Toca ${fechaRelativa(o.fecha)}`}${horaTexto(d) ? ' · ' + horaTexto(d) : ''}</p>
+    <div class="campo"><label for="c-fecha">Día en que se hizo</label><input type="date" id="c-fecha" value="${hoy()}" max="${hoy()}"></div>
+    ${repite(t) ? '<div class="campo"><span class="lbl">La próxima vez</span><div class="opciones" id="c-modo"></div></div>' : ''}
+    <span class="lbl">¿Quién la ha hecho?</span>
+    <div class="quien-btns">${orden.map(k => `<button class="btn bq-${k}" data-q="${k}">${nombreQuien(k)}</button>`).join('')}</div>
+    <button class="btn sec ancho" data-cerrar>Cancelar</button>`);
+  let modo = 'hoy';
+  const pintarModo = () => {
+    const cont = $('#c-modo'); if (!cont) return;
+    const f = $('#c-fecha').value || hoy();
+    const a = siguienteFecha(t, f, 'hoy'), b = siguienteFecha(t, f, 'calendario');
+    const txt = x => x ? fechaLarga(x) : 'Ya no se repite más';
+    if (a === b) { modo = 'hoy'; cont.innerHTML = `<p style="margin:0;font-weight:800">${txt(a)}</p>`; return; }
+    cont.innerHTML = `<button type="button" class="opcion" data-m="hoy" aria-pressed="${modo === 'hoy'}">Contar desde ${f === hoy() ? 'hoy' : 'el ' + fechaCorta(f)}<b>${txt(a)}</b></button>
+      <button type="button" class="opcion" data-m="calendario" aria-pressed="${modo === 'calendario'}">Mantener el calendario<b>${txt(b)}</b></button>`;
+  };
+  pintarModo();
+  $('#c-fecha').onchange = pintarModo;
+  if ($('#c-modo')) $('#c-modo').onclick = e => { const b = e.target.closest('[data-m]'); if (b) { modo = b.dataset.m; pintarModo(); } };
+  sheet.querySelectorAll('[data-q]').forEach(b => b.onclick = () => {
+    const fecha = $('#c-fecha').value;
+    if (!fecha || fecha > hoy()) { $('#c-fecha').focus(); return avisar('Elige hoy o un día anterior'); }
+    cerrarHoja();
+    completar(t, boton, fecha, b.dataset.q, modo);
+  });
+}
+
+function completar(t, boton, fecha, hechaPor, modo) {
+  const o = ocurrenciaActual(t);
+  if (!o) return;
+  const d = datosOcc(o);
+  if (boton) boton.classList.add('lleno', 'pop');
+  const lote = FB.writeBatch(db);
+  const refReg = FB.doc(FB.collection(db, 'registro'));
+  lote.set(refReg, {
+    tareaId: t.id, nombre: d.nombre, tipo: 'tarea', hechaPor, prevista: o.orig, fecha,
+    horaInicio: d.horaInicio || '', horaFin: d.horaFin || '', modo, ts: FB.serverTimestamp()
+  });
+  const antes = { proxima: t.proxima, activa: t.activa !== false, turno: t.turno || null, excepciones: t.excepciones || {} };
+  const cambios = {};
+  const sig = siguienteFecha(t, fecha, modo);
+  if (!sig) cambios.activa = false;
+  else { cambios.proxima = sig; cambios.excepciones = excepcionesDesde(t.excepciones, sig); }
+  if (t.responsable === 'alternar') cambios.turno = siguienteTurno(t.turno, hechaPor);
+  lote.update(FB.doc(db, 'tareas', t.id), cambios);
+  lote.commit().catch(alError);
+  avisar(fecha === hoy() ? `${d.nombre}: hecha` : `${d.nombre}: hecha el ${fechaCorta(fecha)}`, 'Deshacer', () => {
+    const l = FB.writeBatch(db);
+    l.delete(refReg);
+    l.update(FB.doc(db, 'tareas', t.id), antes);
+    l.commit().catch(alError);
+  });
+}
+
+/* ---- Ficha de una vez concreta ---- */
+function fichaOcurrencia(t, orig) {
+  if (!t) return;
+  if (!repite(t)) return formularioElemento(t);
+  const x = (t.excepciones || {})[orig] || null;
+  const actual = tipoDe(t) === 'tarea' && t.activa !== false && orig === t.proxima;
+  const o = { t, orig, fecha: (x && x.fecha) || orig, x, actual };
+  const d = datosOcc(o);
+  const esTarea = tipoDe(t) === 'tarea';
+  abrirHoja(`<h3>${esc(d.nombre)}</h3>
+    <div class="ficha-meta"><span>${fechaLarga(o.fecha)}</span>${horaTexto(d) ? `<span>${horaTexto(d)}</span>` : ''}<span>${nombreQuien(quienDe(d))}${d.alternado ? ' (turno)' : ''}</span></div>
+    <p class="sub">${esTarea ? 'Tarea' : 'Evento'} · ${textoFrecuencia(t.frecuencia, t.hasta)}${x ? ' · <b>este día tiene cambios propios</b>' : ''}</p>
+    ${d.notas ? `<p style="white-space:pre-wrap;margin:0 0 10px">${esc(d.notas)}</p>` : ''}
+    <div class="pila">
+      ${actual ? `<button class="btn ok" id="o-hecha">Marcar como hecha</button>` : ''}
+      <button class="btn sec" id="o-editar-dia">Editar solo este día</button>
+      <button class="btn sec" id="o-borrar-dia">${actual ? 'Saltar esta vez' : 'Eliminar solo este día'}</button>
+      <button class="btn sec" id="o-serie">Editar toda la serie</button>
+      <button class="btn sec" data-cerrar>Cerrar</button>
+    </div>`);
+  if (actual) $('#o-hecha').onclick = () => hojaCompletar(t, null);
+  $('#o-editar-dia').onclick = () => formularioDia(t, orig);
+  $('#o-serie').onclick = () => formularioElemento(t);
+  $('#o-borrar-dia').onclick = () => {
+    cerrarHoja();
+    if (actual) {
+      const antes = { proxima: t.proxima, activa: t.activa !== false, excepciones: t.excepciones || {} };
+      const sig = siguienteFecha(t, t.proxima, 'calendario');
+      const cambios = sig ? { proxima: sig, excepciones: excepcionesDesde(t.excepciones, sig) } : { activa: false };
+      FB.updateDoc(FB.doc(db, 'tareas', t.id), cambios).catch(alError);
+      avisar(sig ? `Saltada. Próxima: ${fechaCorta(sig)}` : 'Saltada', 'Deshacer', () => FB.updateDoc(FB.doc(db, 'tareas', t.id), antes).catch(alError));
+    } else {
+      const antes = t.excepciones || {};
+      FB.updateDoc(FB.doc(db, 'tareas', t.id), { excepciones: { ...antes, [orig]: { borrada: true } } }).catch(alError);
+      avisar(`Eliminado el ${fechaCorta(o.fecha)}`, 'Deshacer', () => FB.updateDoc(FB.doc(db, 'tareas', t.id), { excepciones: antes }).catch(alError));
+    }
+  };
+}
+
+/* ---- Editar solo un día de una serie ---- */
+function formularioDia(t, orig) {
+  const exc = t.excepciones || {};
+  const x = exc[orig] || null;
+  const base = datosOcc({ t, orig, x: null, actual: tipoDe(t) === 'tarea' && orig === t.proxima });
+  const d = datosOcc({ t, orig, x, actual: tipoDe(t) === 'tarea' && orig === t.proxima });
+  let quien = quienDe(d);
+  abrirHoja(`<h3>Solo el ${fechaLarga(orig)}</h3>
+    <p class="sub">Los cambios afectan únicamente a este día. El resto de la serie sigue igual.</p>
+    <div class="campo"><label for="e-nombre">Nombre</label><input type="text" id="e-nombre" value="${esc(d.nombre)}" maxlength="80"></div>
+    <div class="campo"><label for="e-fecha">Día</label><input type="date" id="e-fecha" value="${esc((x && x.fecha) || orig)}"></div>
+    <div class="campo"><span class="lbl">Hora</span><div class="fila2">
+      <input type="time" id="e-hi" value="${esc(d.horaInicio)}" aria-label="Empieza"><span style="flex:none">a</span><input type="time" id="e-hf" value="${esc(d.horaFin)}" aria-label="Termina"></div></div>
+    <div class="campo"><span class="lbl">Quién</span>${segQuien('e-quien', quien, false)}</div>
+    <div class="campo"><label for="e-notas">Notas</label><textarea id="e-notas">${esc(d.notas)}</textarea></div>
+    <div class="acciones"><button class="btn sec" data-cerrar>Cancelar</button><button class="btn" id="e-guardar">Guardar este día</button></div>
+    ${x ? '<button class="btn sec ancho" id="e-restaurar" style="margin-top:10px">Quitar los cambios de este día</button>' : ''}`);
+  activarSeg('e-quien', r => { quien = r; });
+  const guardarExc = (nuevo, texto) => {
+    const antes = exc;
+    FB.updateDoc(FB.doc(db, 'tareas', t.id), { excepciones: nuevo }).catch(alError);
+    cerrarHoja();
+    avisar(texto, 'Deshacer', () => FB.updateDoc(FB.doc(db, 'tareas', t.id), { excepciones: antes }).catch(alError));
+  };
+  $('#e-guardar').onclick = () => {
+    const ov = {};
+    const nombre = $('#e-nombre').value.trim() || base.nombre;
+    const fecha = $('#e-fecha').value || orig;
+    if (nombre !== base.nombre) ov.nombre = nombre;
+    if (fecha !== orig) ov.fecha = fecha;
+    if ($('#e-hi').value !== base.horaInicio) ov.horaInicio = $('#e-hi').value;
+    if ($('#e-hf').value !== base.horaFin) ov.horaFin = $('#e-hf').value;
+    if (quien !== quienDe(base)) ov.responsable = quien;
+    if ($('#e-notas').value.trim() !== base.notas) ov.notas = $('#e-notas').value.trim();
+    const nuevo = { ...exc };
+    if (Object.keys(ov).length) nuevo[orig] = ov; else delete nuevo[orig];
+    guardarExc(nuevo, 'Día actualizado');
+  };
+  if (x) $('#e-restaurar').onclick = () => { const nuevo = { ...exc }; delete nuevo[orig]; guardarExc(nuevo, 'Este día vuelve a ser como la serie'); };
+}
+
+/* ---- Crear o editar una tarea / evento (toda la serie) ---- */
+function formularioElemento(t, fechaInicial) {
+  const nuevo = !t;
+  const v = t || { tipo: 'tarea', nombre: '', responsable: S.tablet ? 'ambos' : S.yo, turno: S.tablet ? 'ivan' : S.yo,
+    frecuencia: { tipo: 'una', cada: 1 }, proxima: fechaInicial || hoy(), horaInicio: '', horaFin: '', notas: '', activa: true };
+  const fr = v.frecuencia || { tipo: 'una', cada: 1 };
+  let tipo = tipoDe(v), responsable = v.responsable || 'ambos';
+  let dias = esMultidia(fr) ? fr.dias.map(Number) : [diaSemana(v.proxima || hoy())];
+  abrirHoja(`<h3>${nuevo ? 'Añadir al tablón' : 'Editar toda la serie'}</h3>
+    <div class="campo"><div class="seg" id="f-tipo">
+      <button type="button" data-r="tarea" aria-pressed="${tipo === 'tarea'}">Tarea (con check)</button>
+      <button type="button" data-r="evento" aria-pressed="${tipo === 'evento'}">Evento / cita</button></div></div>
+    <div class="campo"><label for="f-nombre">Nombre</label><input type="text" id="f-nombre" value="${esc(v.nombre)}" placeholder="Limpiar ventanas, cita dentista, turno de tarde…" maxlength="80"></div>
+    <div class="campo"><span class="lbl">Quién</span>${segQuien('f-resp', responsable, true)}</div>
+    <div class="campo${responsable === 'alternar' ? '' : ' hidden'}" id="f-turno-c"><label for="f-turno">Le toca ahora a</label>
+      <select id="f-turno"><option value="ivan"${(v.turno || 'ivan') === 'ivan' ? ' selected' : ''}>Iván</option><option value="jen"${v.turno === 'jen' ? ' selected' : ''}>Jen</option></select></div>
+    <div class="campo"><label for="f-fecha" id="f-fecha-lbl"></label><input type="date" id="f-fecha" value="${esc(v.proxima || hoy())}"></div>
+    <div class="campo"><span class="lbl">Hora (opcional)</span><div class="fila2">
+      <input type="time" id="f-hi" value="${esc(v.horaInicio || '')}" aria-label="Empieza"><span style="flex:none">a</span>
+      <input type="time" id="f-hf" value="${esc(v.horaFin || '')}" aria-label="Termina">
+      <button type="button" class="icono" id="f-sinhora" aria-label="Quitar la hora" style="flex:none">✕</button></div></div>
+    <div class="campo"><span class="lbl">Repetir</span>
+      <div class="fila2"><select id="f-frec" aria-label="Cada cuánto se repite">
+        ${[['una', 'No se repite'], ['dias', 'Por días'], ['semanas', 'Por semanas'], ['meses', 'Por meses'], ['anios', 'Por años']].map(([k, n]) => `<option value="${k}"${(fr.tipo || 'una') === k ? ' selected' : ''}>${n}</option>`).join('')}
+      </select><input type="number" id="f-cada" min="1" max="365" value="${esc(cadaDe(fr))}" aria-label="Cada cuántos"></div>
+      <div class="chips hidden" id="f-dias" style="margin-top:8px" aria-label="Qué días de la semana">${DIAS_CORTOS.map((n, i) => `<button type="button" class="chip" data-wd="${i}" aria-pressed="${dias.includes(i)}">${n}</button>`).join('')}</div>
+      <p id="f-freq-txt" class="nota" style="margin:6px 0 0"></p></div>
+    <div class="campo hidden" id="f-hasta-c"><label for="f-hasta">Repetir hasta (opcional)</label><input type="date" id="f-hasta" value="${esc(v.hasta || '')}"></div>
+    <div class="campo"><label for="f-notas">Notas</label><textarea id="f-notas" placeholder="Opcional">${esc(v.notas || '')}</textarea></div>
+    ${!nuevo && tipo === 'tarea' && v.activa === false ? '<p class="nota">Esta tarea ya está terminada. Al guardar vuelve a quedar pendiente.</p>' : ''}
+    <div class="acciones"><button class="btn sec" data-cerrar>Cancelar</button><button class="btn" id="f-guardar">Guardar</button></div>
+    ${!nuevo && tipo === 'tarea' && v.activa !== false ? '<button class="btn ok ancho" id="f-hecha" style="margin-top:10px">Marcar como hecha</button>' : ''}
+    ${nuevo ? '' : '<button class="btn peligro ancho" id="f-borrar" style="margin-top:10px">Borrar (todas las repeticiones)</button>'}`);
+
+  const refrescar = () => {
+    const ft = $('#f-frec').value;
+    const rep = ft !== 'una';
+    $('#f-cada').classList.toggle('hidden', !rep);
+    $('#f-dias').classList.toggle('hidden', ft !== 'semanas');
+    $('#f-hasta-c').classList.toggle('hidden', !rep);
     $('#f-turno-c').classList.toggle('hidden', responsable !== 'alternar');
+    $('#f-fecha-lbl').textContent = tipo === 'evento' ? (rep ? 'Empieza el' : 'Fecha') : (nuevo ? 'Primera vez' : 'Próxima vez');
+    $('#f-freq-txt').textContent = rep ? textoFrecuencia(frecuenciaForm()) : '';
   };
-  const refrescarFreq = () => {
-    const tipo = $('#f-tipo').value;
-    $('#f-cada').disabled = tipo === 'una';
-    $('#f-freq-txt').textContent = textoFrecuencia({ tipo, cada: $('#f-cada').value });
+  const frecuenciaForm = () => {
+    const ft = $('#f-frec').value;
+    const f = { tipo: ft, cada: Math.max(1, parseInt($('#f-cada').value, 10) || 1) };
+    if (ft === 'semanas' && dias.length > 1) f.dias = [...dias].sort((a, b) => a - b);
+    return f;
   };
-  $('#f-tipo').onchange = refrescarFreq; $('#f-cada').oninput = refrescarFreq;
+  activarSeg('f-tipo', r => { tipo = r; refrescar(); });
+  activarSeg('f-resp', r => { responsable = r; refrescar(); });
+  $('#f-frec').onchange = refrescar;
+  $('#f-cada').oninput = refrescar;
+  $('#f-sinhora').onclick = () => { $('#f-hi').value = ''; $('#f-hf').value = ''; };
+  $('#f-fecha').onchange = () => {
+    // Si solo hay un día marcado, que siga al día de la fecha elegida
+    if (dias.length === 1 && $('#f-fecha').value) {
+      dias = [diaSemana($('#f-fecha').value)];
+      sheet.querySelectorAll('#f-dias .chip').forEach(c => c.setAttribute('aria-pressed', dias.includes(+c.dataset.wd)));
+      refrescar();
+    }
+  };
+  $('#f-dias').onclick = e => {
+    const c = e.target.closest('[data-wd]'); if (!c) return;
+    const i = +c.dataset.wd;
+    if (dias.includes(i)) { if (dias.length === 1) return; dias = dias.filter(x => x !== i); } else dias.push(i);
+    c.setAttribute('aria-pressed', dias.includes(i));
+    refrescar();
+  };
+  refrescar();
 
   $('#f-guardar').onclick = () => {
     const nombre = $('#f-nombre').value.trim();
-    if (!nombre) { $('#f-nombre').focus(); return avisar('Escribe un nombre para la tarea'); }
-    const fecha = $('#f-fecha').value || hoy();
+    if (!nombre) { $('#f-nombre').focus(); return avisar('Escribe un nombre'); }
+    let fecha = $('#f-fecha').value || hoy();
+    const frecuencia = frecuenciaForm();
+    if (frecuencia.tipo === 'semanas') {
+      // la fecha se ajusta al primer día marcado a partir de la elegida
+      for (let i = 0; i < 7 && !dias.includes(diaSemana(fecha)); i++) fecha = sumarDias(fecha, 1);
+    }
+    const rep = frecuencia.tipo !== 'una';
+    const hasta = rep ? ($('#f-hasta').value || null) : null;
+    if (hasta && hasta < fecha) { $('#f-hasta').focus(); return avisar('"Repetir hasta" no puede ser antes del primer día'); }
     const datos = {
-      nombre, categoriaId: $('#f-cat').value || null,
-      responsable, turno: responsable === 'alternar' ? $('#f-turno').value : null,
-      frecuencia: { tipo: $('#f-tipo').value, cada: Math.max(1, parseInt($('#f-cada').value, 10) || 1) },
-      proxima: fecha, notas: $('#f-notas').value.trim(), activa: true
+      tipo, nombre, responsable, turno: responsable === 'alternar' ? $('#f-turno').value : null,
+      frecuencia, proxima: fecha, hasta,
+      horaInicio: $('#f-hi').value || '', horaFin: $('#f-hf').value || '',
+      notas: $('#f-notas').value.trim(), activa: true
     };
-    const op = nueva
-      ? FB.addDoc(FB.collection(db, 'tareas'), { ...datos, creadaPor: S.yo, creada: FB.serverTimestamp() })
+    const op = nuevo
+      ? FB.addDoc(FB.collection(db, 'tareas'), { ...datos, excepciones: {}, creadaPor: S.yo, creada: FB.serverTimestamp() })
       : FB.updateDoc(FB.doc(db, 'tareas', t.id), datos);
     op.catch(alError);
     cerrarHoja();
-    avisar(nueva ? 'Tarea creada' : 'Cambios guardados');
+    if (fecha !== S.cal.fecha && (fecha < lunesDe(S.cal.fecha) || fecha > sumarDias(lunesDe(S.cal.fecha), 6)) && S.cal.modo === 'semana') {
+      avisar(nuevo ? `Añadido para el ${fechaCorta(fecha)}` : 'Cambios guardados', 'Ver', () => { S.cal.fecha = fecha; S.irA = fecha; pintar(); });
+    } else avisar(nuevo ? 'Añadido al tablón' : 'Cambios guardados');
   };
-  if (!nueva && v.activa !== false) $('#h-marcar').onclick = () => {
-    const fecha = $('#h-fecha').value;
-    if (!fecha || fecha > hoy()) { $('#h-fecha').focus(); return avisar('Elige hoy o un día anterior'); }
-    cerrarHoja();
-    completar(t.id, null, fecha, $('#h-quien').value);
-  };
-  if (!nueva) $('#f-borrar').onclick = () => {
-    if (!confirm(`¿Borrar "${t.nombre}"? El historial de veces que se hizo se conserva.`)) return;
+  if ($('#f-hecha')) $('#f-hecha').onclick = () => hojaCompletar(t, null);
+  if (!nuevo) $('#f-borrar').onclick = () => {
+    if (!confirm(`¿Borrar "${t.nombre}" y todas sus repeticiones? Las veces que ya se hizo siguen en el tablón.`)) return;
     FB.deleteDoc(FB.doc(db, 'tareas', t.id)).catch(alError);
     cerrarHoja();
-    avisar('Tarea borrada');
+    avisar('Borrado');
   };
-  if (nueva) setTimeout(() => $('#f-nombre').focus(), 50);
+  if (nuevo) setTimeout(() => $('#f-nombre')?.focus(), 50);
 }
 
-/* Es la última vez que se hizo esa tarea (según los registros cargados) */
+/* ---- Registro de una tarea hecha ---- */
 function esUltimoRegistro(r) {
   return !S.registro.some(x => x.tareaId === r.tareaId && x.id !== r.id &&
     (x.fecha > r.fecha || (x.fecha === r.fecha && x._ts > r._ts)));
 }
 
-function elegirQuien(t, boton) {
-  abrirHoja(`<h3>${esc(t.nombre)}</h3>
-    <p style="margin:0 0 14px;color:var(--tinta-suave)">¿Quién la ha hecho?</p>
-    <div class="acciones" style="flex-direction:column">
-      <button class="btn" data-q="${S.yo}" style="background:${PERSONAS[S.yo].color};color:#fff">Yo (${PERSONAS[S.yo].nombre})</button>
-      <button class="btn" data-q="ambos" style="background:var(--menta);color:#fff">Los dos</button>
-      <button class="btn sec" data-cerrar>Cancelar</button>
-    </div>`);
-  sheet.querySelectorAll('[data-q]').forEach(b => b.onclick = () => { cerrarHoja(); completar(t.id, boton, null, b.dataset.q); });
-}
-
 function formularioRegistro(r) {
   if (!r) return;
-  const t = S.tareas.find(x => x.id === r.tareaId);
+  const t = buscar(r.tareaId);
   const ultimo = t && esUltimoRegistro(r);
   abrirHoja(`<h3>${esc(r.nombre)}</h3>
-    <p style="margin:0 0 14px;color:var(--tinta-suave)">Registro de tarea hecha${r.prevista ? `. Tocaba el ${fechaCorta(r.prevista)}` : ''}.</p>
+    <p class="sub">Tarea hecha${r.prevista ? `. Tocaba el ${fechaCorta(r.prevista)}` : ''}.</p>
     <div class="campo"><label for="r-fecha">Día en que se hizo</label><input type="date" id="r-fecha" value="${esc(r.fecha)}" max="${hoy()}"></div>
-    <div class="campo"><label for="r-quien">Quién la hizo</label><select id="r-quien">${opcionesQuien(r.hechaPor)}</select></div>
-    ${ultimo ? `<p style="color:var(--tinta-suave);font-size:.85rem">Es la última vez que se hizo esta tarea: si cambias el día, la próxima fecha se recalcula; si eliminas el registro, la tarea vuelve a quedar pendiente.</p>` : ''}
+    <div class="campo"><span class="lbl">Quién la hizo</span>${segQuien('r-quien', r.hechaPor, false)}</div>
+    ${ultimo ? '<p class="nota">Es la última vez que se hizo esta tarea: si cambias el día, la próxima fecha se recalcula; si eliminas el registro, la tarea vuelve a quedar pendiente.</p>' : ''}
     <div class="acciones"><button class="btn sec" data-cerrar>Cancelar</button><button class="btn" id="r-guardar">Guardar</button></div>
     <button class="btn peligro ancho" id="r-borrar" style="margin-top:10px">Eliminar registro</button>
-    ${t ? `<button class="btn sec ancho" id="r-tarea" style="margin-top:10px">Editar la tarea</button>` : '<p style="color:var(--tinta-suave);font-size:.85rem;margin-top:10px">La tarea original ya no existe.</p>'}`);
-  const $ = q => sheet.querySelector(q);
+    ${t ? '<button class="btn sec ancho" id="r-tarea" style="margin-top:10px">Editar la tarea</button>' : '<p class="nota" style="margin-top:10px">La tarea original ya no existe.</p>'}`);
+  let quien = r.hechaPor;
+  activarSeg('r-quien', q => { quien = q; });
 
   $('#r-guardar').onclick = () => {
-    const fecha = $('#r-fecha').value, quien = $('#r-quien').value;
+    const fecha = $('#r-fecha').value;
     if (!fecha || fecha > hoy()) { $('#r-fecha').focus(); return avisar('Elige hoy o un día anterior'); }
     const lote = FB.writeBatch(db);
     lote.update(FB.doc(db, 'registro', r.id), { fecha, hechaPor: quien });
     if (ultimo) {
       const cambios = {};
-      if (t.frecuencia && t.frecuencia.tipo !== 'una' && fecha !== r.fecha) cambios.proxima = paso(fecha, t.frecuencia, 1);
+      if (repite(t) && fecha !== r.fecha && r.prevista) {
+        const sig = siguienteFecha({ ...t, proxima: r.prevista }, fecha, r.modo || 'hoy');
+        if (sig) { cambios.proxima = sig; cambios.activa = true; } else cambios.activa = false;
+      }
       if (t.responsable === 'alternar' && quien !== r.hechaPor) cambios.turno = siguienteTurno(t.turno, quien);
       if (Object.keys(cambios).length) lote.update(FB.doc(db, 'tareas', t.id), cambios);
     }
@@ -798,7 +1069,7 @@ function formularioRegistro(r) {
   };
 
   $('#r-borrar').onclick = () => {
-    if (!confirm(ultimo ? 'Se eliminará el registro y la tarea volverá a quedar pendiente. ¿Seguir?' : '¿Eliminar este registro del historial?')) return;
+    if (!confirm(ultimo ? 'Se eliminará el registro y la tarea volverá a quedar pendiente. ¿Seguir?' : '¿Eliminar este registro?')) return;
     const lote = FB.writeBatch(db);
     lote.delete(FB.doc(db, 'registro', r.id));
     if (ultimo) {
@@ -812,52 +1083,80 @@ function formularioRegistro(r) {
     avisar('Registro eliminado');
   };
 
-  if (t) $('#r-tarea').onclick = () => formularioTarea(t);
+  if (t) $('#r-tarea').onclick = () => formularioElemento(t);
 }
 
-function formularioCategorias() {
-  const usadas = new Set(S.tareas.map(t => t.categoriaId));
-  abrirHoja(`<h3>Categorías</h3>
-    <div id="cats">${S.categorias.map(c => `<div class="cat-edit" data-id="${c.id}">
-      <input type="color" value="${esc(c.color)}" aria-label="Color de ${esc(c.nombre)}">
-      <input type="text" value="${esc(c.nombre)}" aria-label="Nombre de la categoría" maxlength="30">
-      <button class="icono" data-borrarcat="${c.id}" aria-label="Borrar ${esc(c.nombre)}"${usadas.has(c.id) ? ' disabled title="Tiene tareas asignadas"' : ''}>✕</button></div>`).join('')}</div>
-    <div class="cat-edit"><input type="color" id="nc-color" value="#F9E3A3" aria-label="Color de la nueva categoría">
-      <input type="text" id="nc-nombre" placeholder="Nueva categoría" maxlength="30"></div>
-    <p style="color:var(--tinta-suave);font-size:.85rem">Solo se pueden borrar las categorías sin tareas.</p>
-    <div class="acciones"><button class="btn sec" data-cerrar>Cancelar</button><button class="btn" id="c-guardar">Guardar</button></div>`);
-  sheet.querySelectorAll('[data-borrarcat]').forEach(b => b.onclick = () => {
-    if (!confirm('¿Borrar esta categoría?')) return;
-    FB.deleteDoc(FB.doc(db, 'categorias', b.dataset.borrarcat)).catch(alError);
-    b.closest('.cat-edit').remove();
-  });
-  sheet.querySelector('#c-guardar').onclick = () => {
-    sheet.querySelectorAll('#cats .cat-edit').forEach(fila => {
-      const id = fila.dataset.id, [color, nombre] = fila.querySelectorAll('input');
-      const orig = S.categorias.find(c => c.id === id);
-      const n = nombre.value.trim();
-      if (orig && n && (n !== orig.nombre || color.value !== orig.color))
-        FB.updateDoc(FB.doc(db, 'categorias', id), { nombre: n, color: color.value }).catch(alError);
-    });
-    const nn = sheet.querySelector('#nc-nombre').value.trim();
-    if (nn) FB.addDoc(FB.collection(db, 'categorias'), { nombre: nn, color: sheet.querySelector('#nc-color').value }).catch(alError);
-    cerrarHoja();
-    avisar('Categorías guardadas');
+/* ---- Lista de todo lo que hay en el tablón ---- */
+function hojaTodo() {
+  const orden = (a, b) => a.nombre.localeCompare(b.nombre, 'es');
+  const fila = t => {
+    const q = t.responsable === 'alternar' ? (t.turno || 'ivan') : (t.responsable || 'ambos');
+    const cuando = tipoDe(t) === 'tarea'
+      ? (t.activa === false ? 'Terminada' : `Próxima: ${fechaRelativa(t.proxima)}`)
+      : (repite(t) ? `Desde el ${fechaCorta(t.proxima)}` : fechaConDia(t.proxima));
+    return `<div class="tarjeta p-${q}${t.activa === false ? ' hecha' : ''}"><div class="info" data-editar="${t.id}">
+      <div class="nombre">${esc(t.nombre)}</div>
+      <div class="meta"><span class="quien">${t.responsable === 'alternar' ? 'Alternar' : nombreQuien(q)}</span><span>${textoFrecuencia(t.frecuencia, t.hasta)}</span>${horaTexto(t) ? `<span class="hora">${horaTexto(t)}</span>` : ''}<span>${cuando}</span></div></div></div>`;
   };
+  const tareas = S.tareas.filter(t => tipoDe(t) === 'tarea' && t.activa !== false).sort(orden);
+  const eventos = S.tareas.filter(t => tipoDe(t) === 'evento').sort(orden);
+  const fin = S.tareas.filter(t => tipoDe(t) === 'tarea' && t.activa === false).sort(orden);
+  const bloque = (titulo, xs) => xs.length ? `<h2>${titulo} <span class="n">${xs.length}</span></h2><div class="lista">${xs.map(fila).join('')}</div>` : '';
+  abrirHoja(`<h3>Todo el tablón</h3><p class="sub">Toca uno para editarlo.</p>
+    ${bloque('Tareas', tareas)}${bloque('Eventos', eventos)}${bloque('Tareas terminadas', fin)}
+    ${S.tareas.length ? '' : '<div class="vacio">Aún no hay nada. Añade lo primero con el botón amarillo.</div>'}
+    <button class="btn sec ancho" data-cerrar style="margin-top:16px">Cerrar</button>`);
 }
 
+/* ---- Cuenta y modo tablet ---- */
 function menuCuenta() {
   abrirHoja(`<h3>Cuenta</h3>
     <p>Has entrado como <strong>${esc(S.usuario.email)}</strong> (${PERSONAS[S.yo].nombre}).</p>
-    <p style="color:var(--tinta-suave);font-size:.85rem">HomePlan v${VERSION_APP}</p>
+    <div class="interruptor"><div><b>Este dispositivo es la tablet compartida</b>
+      <span>Al marcar una tarea siempre pregunta quién la ha hecho, intenta que la pantalla no se apague y, tras ${MINUTOS_VOLVER_A_HOY} minutos sin tocarla, vuelve a la semana actual.</span></div>
+      <button class="btn ${S.tablet ? 'ok' : 'sec'}" id="m-tablet">${S.tablet ? 'Sí' : 'No'}</button></div>
+    <p class="nota">HomePlan v${VERSION_APP}</p>
     <div class="acciones"><button class="btn sec" data-cerrar>Cerrar</button><button class="btn peligro" id="salir">Cerrar sesión</button></div>`);
-  sheet.querySelector('#salir').onclick = () => { cerrarHoja(); FB.signOut(auth); };
+  $('#m-tablet').onclick = () => {
+    S.tablet = !S.tablet;
+    try { localStorage.setItem(CLAVE_TABLET, S.tablet ? '1' : '0'); } catch (e) { /* sin almacenamiento */ }
+    if (S.tablet) mantenerPantalla(); else soltarPantalla();
+    pintar();
+    menuCuenta();
+  };
+  $('#salir').onclick = () => { cerrarHoja(); FB.signOut(auth); };
 }
 
-/* Si la app queda abierta al cambiar de día, repintar */
-let ultimoDia = hoy();
-setInterval(() => { if (hoy() !== ultimoDia) { ultimoDia = hoy(); pintar(); } }, 60000);
-document.addEventListener('visibilitychange', () => { if (!document.hidden && hoy() !== ultimoDia) { ultimoDia = hoy(); pintar(); } });
+/* Pantalla siempre encendida en la tablet (si el navegador lo permite) */
+let candado = null;
+async function mantenerPantalla() {
+  if (!S.tablet || document.hidden || !('wakeLock' in navigator) || candado) return;
+  try {
+    candado = await navigator.wakeLock.request('screen');
+    candado.addEventListener('release', () => { candado = null; });
+  } catch (e) { console.warn('No se pudo mantener la pantalla encendida', e); candado = null; }
+}
+async function soltarPantalla() { try { await candado?.release(); } catch (e) { /* nada */ } candado = null; }
+
+/* Reloj, cambio de día y vuelta a la semana actual en la tablet */
+let ultimoDia = hoy(), ultimaInteraccion = Date.now();
+setInterval(() => {
+  const ahora = new Date();
+  const reloj = document.getElementById('reloj');
+  if (reloj) reloj.textContent = `${pad(ahora.getHours())}:${pad(ahora.getMinutes())}`;
+  if (hoy() !== ultimoDia) { ultimoDia = hoy(); pintar(); }
+  if (S.tablet && sheet.classList.contains('hidden') && Date.now() - ultimaInteraccion > MINUTOS_VOLVER_A_HOY * 60000) {
+    const fuera = S.vista !== 'tablon' || S.cal.modo !== 'semana' || lunesDe(S.cal.fecha) !== lunesDe(hoy()) || S.cal.persona !== 'todos';
+    if (fuera) { S.vista = 'tablon'; S.cal = { modo: 'semana', fecha: hoy(), persona: 'todos' }; pintar(); window.scrollTo(0, 0); }
+    ultimaInteraccion = Date.now();
+  }
+}, 20000);
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) return;
+  if (hoy() !== ultimoDia) { ultimoDia = hoy(); pintar(); }
+  mantenerPantalla();
+});
+anchoTablet.addEventListener?.('change', () => pintar());
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(e => console.warn('Service worker no registrado', e)));
