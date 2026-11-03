@@ -139,6 +139,8 @@ textarea{min-height:70px;resize:vertical}
 .btn.ok{background:var(--menta);color:#fff}
 .btn.ancho{width:100%}
 .btn.peq{padding:8px 12px}
+.btn-ico{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn-ico svg{width:18px;height:18px}
 .icono{border:1px solid var(--linea);background:var(--superficie);border-radius:12px;width:42px;height:42px;display:grid;place-items:center;padding:0;flex:none}
 .icono svg{width:20px;height:20px}
 .fab{position:fixed;right:max(16px,calc(50% - 304px));bottom:calc(86px + env(safe-area-inset-bottom,0px));width:60px;height:60px;border-radius:50%;border:0;background:var(--sol);color:#17303A;box-shadow:0 6px 18px rgba(23,48,58,.25);display:grid;place-items:center;z-index:11}
@@ -246,7 +248,7 @@ textarea{min-height:70px;resize:vertical}
 .resultado{text-align:center;font-weight:900;font-size:1.3rem;min-height:1.6em;margin:0 0 10px}
 
 /* Semana con horas (pantalla ancha) */
-.rj{--hh:36px;display:flex;flex-direction:column;gap:6px}
+.rj{--hh:26px;display:flex;flex-direction:column;gap:6px}
 .rj-fila{display:grid;grid-template-columns:46px repeat(7,minmax(0,1fr));gap:0 6px}
 .rj-cab h3{display:flex;align-items:center;justify-content:space-between;margin:0;font-size:1rem;font-weight:800;padding:0 2px}
 .rj-cab h3.es-hoy{color:var(--menta)}
@@ -335,7 +337,7 @@ const firebaseConfig = {
   measurementId: "G-G3KRG9DN75"
 };
 
-const VERSION_APP = '1.7.2';
+const VERSION_APP = '1.7.3';
 const PERSONAS = { ivan: { nombre: 'Iván' }, jen: { nombre: 'Jen' } };
 const CLAVE_TABLET = 'homeplan-tablet';
 const MINUTOS_VOLVER_A_HOY = 5;
@@ -751,7 +753,7 @@ function tarjetaReg(r, it = {}) {
 const tarjeta = it => it.tipo === 'reg' ? tarjetaReg(it.r, it) : tarjetaOcc(it);
 
 /* ---------- Horas: tramos de cada día y columnas cuando se solapan ---------- */
-const HORA_ALTO = 36, HORA_INICIO = 7, MIN_VISIBLE = 30;
+const HORA_ALTO = 26, HORA_INICIO = 0, MIN_VISIBLE = 30;
 const aMin = s => { const [h, m] = String(s).split(':').map(Number); return (h || 0) * 60 + (m || 0); };
 const horasDe = it => it.tipo === 'reg' ? it.r : it.d;
 /* Separa lo que tiene hora (bloques en minutos del día) de lo que no.
@@ -917,8 +919,8 @@ function vistaTablon() {
         <div class="tit">${titulo}</div>
         <button class="icono" data-mover="1" aria-label="Siguiente">${I.der}</button>
         <button class="btn sec peq" data-irhoy>Hoy</button>
-        <button class="icono" data-todo aria-label="Ver todas las tareas y eventos">${I.lista}</button>
       </div>
+      <button class="btn sec peq btn-ico" data-todo>${I.lista}<span>Tareas y eventos</span></button>
     </div>
     ${cuerpo}`;
 }
@@ -1487,7 +1489,7 @@ function pintar() {
 }
 
 /* ---------- Eventos de la interfaz ---------- */
-const ACCIONES = '[data-cerrar],[data-completar],[data-occ],[data-registro],[data-editar],[data-vista],[data-modo],[data-persona],[data-mover],[data-irhoy],[data-dia],[data-nueva],[data-nuevo-dia],[data-cuenta],[data-todo],' +
+const ACCIONES = '[data-cerrar],[data-completar],[data-occ],[data-registro],[data-editar],[data-vista],[data-modo],[data-persona],[data-mover],[data-irhoy],[data-dia],[data-nueva],[data-nuevo-dia],[data-cuenta],[data-todo],[data-borrar-el],' +
   '[data-anadir],[data-sug],[data-habituales],[data-comprar],[data-item],[data-tienda-f],[data-tiendas],[data-quitar-comprados],' +
   '[data-peli],[data-nueva-peli],[data-ruleta],[data-ajustes-pelis],[data-pfestado]';
 app.addEventListener('input', e => {
@@ -1524,6 +1526,7 @@ document.addEventListener('click', e => {
   if (d.nuevoDia) return formularioElemento(null, d.nuevoDia);
   if ('cuenta' in d) return menuCuenta();
   if ('todo' in d) return hojaTodo();
+  if (d.borrarEl) return borrarElemento(buscar(d.borrarEl));
   // compra
   if ('anadir' in d) return anadirDesdeBarra();
   if (d.sug) { const pr = S.productos.find(x => x.id === d.sug); if (pr) { anadirCompra(pr.nombre, '', pr.tiendaId || S.compraTienda || ''); S.compraTexto = ''; pintar(); } return; }
@@ -1888,23 +1891,43 @@ function formularioRegistro(r) {
 /* ---- Lista de todo lo que hay en el tablón ---- */
 function hojaTodo() {
   const orden = (a, b) => a.nombre.localeCompare(b.nombre, 'es');
+  const p = S.todoP || 'todos';
+  const quienSerie = t => t.responsable === 'alternar' ? (t.turno || 'ivan') : (t.responsable || 'ambos');
+  const pasa = t => p === 'todos' || t.responsable === 'alternar' || quienSerie(t) === p || quienSerie(t) === 'ambos';
   const fila = t => {
-    const q = t.responsable === 'alternar' ? (t.turno || 'ivan') : (t.responsable || 'ambos');
+    const q = quienSerie(t);
     const cuando = tipoDe(t) === 'tarea'
       ? (t.activa === false ? 'Terminada' : `Próxima: ${fechaRelativa(t.proxima)}`)
       : (repite(t) ? `Desde el ${fechaCorta(t.proxima)}` : fechaConDia(t.proxima));
-    return `<div class="tarjeta p-${q}${t.activa === false ? ' hecha' : ''}"><div class="info" data-editar="${t.id}">
+    const cambios = Object.values(t.excepciones || {}).length;
+    return `<div class="tarjeta p-${q}${t.activa === false ? ' hecha' : ''}" data-fila="${t.id}">
+      <span class="ev-ico" aria-hidden="true">${tipoDe(t) === 'evento' ? I.cal : I.ok}</span>
+      <div class="info" data-editar="${t.id}">
       <div class="nombre">${esc(t.nombre)}</div>
-      <div class="meta"><span class="quien">${t.responsable === 'alternar' ? 'Alternar' : nombreQuien(q)}</span><span>${textoFrecuencia(t.frecuencia, t.hasta)}</span>${horaTexto(t) ? `<span class="hora">${horaTexto(t)}</span>` : ''}<span>${cuando}</span></div></div></div>`;
+      <div class="meta"><span class="quien">${t.responsable === 'alternar' ? 'Alternar' : nombreQuien(q)}</span><span>${tipoDe(t) === 'evento' ? 'Evento' : 'Tarea'}</span><span>${textoFrecuencia(t.frecuencia, t.hasta)}</span>${horaTexto(t) ? `<span class="hora">${horaTexto(t)}</span>` : ''}<span>${cuando}</span>${cambios ? `<span>${cambios} día${cambios > 1 ? 's' : ''} cambiado${cambios > 1 ? 's' : ''}</span>` : ''}</div></div>
+      <button class="icono" data-borrar-el="${t.id}" aria-label="Borrar ${esc(t.nombre)}" style="align-self:center">✕</button></div>`;
   };
-  const tareas = S.tareas.filter(t => tipoDe(t) === 'tarea' && t.activa !== false).sort(orden);
-  const eventos = S.tareas.filter(t => tipoDe(t) === 'evento').sort(orden);
-  const fin = S.tareas.filter(t => tipoDe(t) === 'tarea' && t.activa === false).sort(orden);
-  const bloque = (titulo, xs) => xs.length ? `<h2>${titulo} <span class="n">${xs.length}</span></h2><div class="lista">${xs.map(fila).join('')}</div>` : '';
-  abrirHoja(`<h3>Todo el tablón</h3><p class="sub">Toca uno para editarlo.</p>
-    ${bloque('Tareas', tareas)}${bloque('Eventos', eventos)}${bloque('Tareas terminadas', fin)}
-    ${S.tareas.length ? '' : '<div class="vacio">Aún no hay nada. Añade lo primero con el botón amarillo.</div>'}
+  const xs = S.tareas.filter(pasa);
+  const repetitivas = xs.filter(t => repite(t) && !(tipoDe(t) === 'tarea' && t.activa === false)).sort(orden);
+  const unaVez = xs.filter(t => !repite(t) && !(tipoDe(t) === 'tarea' && t.activa === false)).sort((a, b) => (a.proxima || '').localeCompare(b.proxima || ''));
+  const fin = xs.filter(t => tipoDe(t) === 'tarea' && t.activa === false).sort(orden);
+  const bloque = (titulo, ys, nota) => ys.length ? `<h2>${titulo} <span class="n">${ys.length}</span></h2>${nota ? `<p class="nota" style="margin:-4px 0 8px">${nota}</p>` : ''}<div class="lista">${ys.map(fila).join('')}</div>` : '';
+  abrirHoja(`<h3>Tareas y eventos</h3><p class="sub">Toca uno para editarlo, o la ✕ para borrarlo con todas sus repeticiones.</p>
+    <div class="seg" id="todo-p" style="margin-bottom:6px">${[['todos', 'Todos'], ['ivan', 'Iván'], ['jen', 'Jen']].map(([k, n]) => `<button type="button" data-r="${k}" aria-pressed="${p === k}">${n}</button>`).join('')}</div>
+    ${bloque('Se repiten', repetitivas)}${bloque('Una sola vez', unaVez)}${bloque('Tareas terminadas', fin, 'Tareas de una vez ya hechas o series que llegaron a su fecha final.')}
+    ${xs.length ? '' : '<div class="vacio">No hay nada aquí. Añade lo primero con el botón amarillo.</div>'}
     <button class="btn sec ancho" data-cerrar style="margin-top:16px">Cerrar</button>`);
+  activarSeg('todo-p', r => { S.todoP = r; hojaTodo(); });
+}
+
+function borrarElemento(t) {
+  if (!t) return;
+  const veces = repite(t) ? ' y todas sus repeticiones' : '';
+  if (!confirm(`¿Borrar "${t.nombre}"${veces}? Las veces que ya se hizo siguen en el tablón.`)) return;
+  const { id, ...datos } = t;
+  FB.deleteDoc(FB.doc(db, 'tareas', id)).catch(alError);
+  sheet.querySelector(`[data-fila="${id}"]`)?.remove();
+  avisar(`Borrado: ${t.nombre}`, 'Deshacer', () => FB.setDoc(FB.doc(db, 'tareas', id), datos).catch(alError));
 }
 
 /* ---- Cuenta y modo tablet ---- */
