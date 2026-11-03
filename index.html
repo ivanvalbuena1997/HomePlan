@@ -282,6 +282,37 @@ textarea{min-height:70px;resize:vertical}
 .ahora{position:absolute;left:-2px;right:-2px;height:2px;background:var(--alerta);z-index:3;pointer-events:none}
 .ahora::before{content:"";position:absolute;left:-4px;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--alerta)}
 
+/* Móvil: semana en miniatura + día con horas */
+.mini-semana{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-bottom:10px}
+.mini-dia{border:1px solid var(--linea);background:var(--superficie);border-radius:12px;padding:4px 3px 5px;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0}
+.mini-dia.sel{border:2px solid var(--tinta);box-shadow:0 2px 8px rgba(23,48,58,.15)}
+.mini-dia.hoy .md-num{background:var(--menta);color:#fff}
+.md-n{font-size:.7rem;font-weight:800;color:var(--tinta-suave)}
+.md-num{font-weight:900;font-size:.95rem;width:26px;height:26px;border-radius:50%;display:grid;place-items:center}
+.md-puntos{display:flex;gap:2px;height:7px;align-items:center}
+.md-puntos b{width:6px;height:6px;border-radius:50%;background:var(--pc)}
+.md-puntos b.atr{box-shadow:0 0 0 1.5px var(--alerta)}
+.md-puntos small{font-size:.6rem;font-weight:900;line-height:1;color:var(--tinta-suave)}
+.md-linea{position:relative;width:100%;height:64px;border-radius:6px;background:repeating-linear-gradient(to bottom,var(--linea) 0,var(--linea) 1px,transparent 1px,transparent 25%),var(--papel)}
+.md-linea i{position:absolute;background:var(--pc);border-radius:2px;outline:1px solid var(--superficie)}
+.md-linea i.ok{opacity:.45}
+.dia-movil h3{display:flex;align-items:center;justify-content:space-between;font-size:1.05rem;font-weight:900;margin:4px 0 8px}
+.dia-movil h3.es-hoy{color:var(--menta)}
+.dia-movil .rj-sin>div{max-height:150px}
+.dia-movil .bloque .tarjeta{padding:4px 7px;gap:7px}
+.dia-movil .bloque .nombre{font-size:.88rem}
+.dia-movil .bloque .meta{font-size:.74rem}
+@media (max-width: 899px){
+  .tablon-cab{padding:12px 14px;margin-bottom:10px}
+  .tablon-cab .dia{font-size:1.45rem}
+  .tablon-cab .resumen{font-size:.88rem}
+  .controles{gap:6px;margin-bottom:10px}
+  .controles .seg{flex:1 1 40%;min-width:0}
+  .nav-fecha{flex:1 1 70%;min-width:0}
+  .btn-ico span{display:none}
+  .btn-ico{padding:0;width:42px;height:42px;justify-content:center}
+}
+
 /* Pantalla ancha (tablet en horizontal): la semana entera en 7 columnas */
 @media (min-width: 900px){
   #app{max-width:none;padding:0 18px 96px}
@@ -337,7 +368,7 @@ const firebaseConfig = {
   measurementId: "G-G3KRG9DN75"
 };
 
-const VERSION_APP = '1.7.3';
+const VERSION_APP = '1.7.4';
 const PERSONAS = { ivan: { nombre: 'Iván' }, jen: { nombre: 'Jen' } };
 const CLAVE_TABLET = 'homeplan-tablet';
 const MINUTOS_VOLVER_A_HOY = 5;
@@ -753,7 +784,7 @@ function tarjetaReg(r, it = {}) {
 const tarjeta = it => it.tipo === 'reg' ? tarjetaReg(it.r, it) : tarjetaOcc(it);
 
 /* ---------- Horas: tramos de cada día y columnas cuando se solapan ---------- */
-const HORA_ALTO = 26, HORA_INICIO = 0, MIN_VISIBLE = 30;
+const HORA_ALTO = 26, HORA_ALTO_MOVIL = 38, HORA_INICIO = 0, MIN_VISIBLE = 30;
 const aMin = s => { const [h, m] = String(s).split(':').map(Number); return (h || 0) * 60 + (m || 0); };
 const horasDe = it => it.tipo === 'reg' ? it.r : it.d;
 /* Separa lo que tiene hora (bloques en minutos del día) de lo que no.
@@ -778,8 +809,8 @@ function tramosDia(items, prev) {
   return { sinHora, bloques };
 }
 /* Reparte en columnas los bloques que coinciden en el tiempo */
-function colocar(bloques) {
-  const minimo = Math.round(22 / HORA_ALTO * 60); // alto mínimo visible, en minutos
+function colocar(bloques, alto = HORA_ALTO) {
+  const minimo = Math.round(22 / alto * 60); // alto mínimo visible, en minutos
   const fin = bl => Math.max(bl.b, bl.a + minimo);
   const xs = [...bloques].sort((x, y) => x.a - y.a || fin(y) - fin(x));
   let grupo = [], finGrupo = -1;
@@ -799,45 +830,52 @@ function colocar(bloques) {
   if (grupo.length) cerrar();
   return xs;
 }
-/* Marca las cosas de un día que coinciden en horario con otra (para la lista del móvil) */
-function marcarSolapes(items) {
-  const { bloques } = tramosDia(items);
-  const real = bloques.map(bl => ({ ...bl, b: bl.sinFin ? bl.a + 1 : bl.b }));
-  for (let i = 0; i < real.length; i++) for (let j = i + 1; j < real.length; j++) {
-    const x = real[i], y = real[j];
-    if (x.a < y.b && y.a < x.b) { x.it.solapa = true; y.it.solapa = true; }
-  }
-}
-
-function semanaConHoras(ini, mapa, h) {
-  const dias = Array.from({ length: 7 }, (_, i) => sumarDias(ini, i));
+/* Rejilla horaria de varios días (7 en la tablet, 1 en el móvil) */
+function rejillaHoras(dias, mapa, h, { alto: HH = HORA_ALTO, cabecera = true } = {}) {
   const porDia = dias.map(d => tramosDia(mapa[d] || [], mapa[sumarDias(d, -1)] || []));
   const primero = Math.min(HORA_INICIO, ...porDia.flatMap(x => x.bloques.map(bl => Math.floor(bl.a / 60))));
-  const alto = (24 - primero) * HORA_ALTO;
-  const px = min => (min - primero * 60) / 60 * HORA_ALTO;
+  const px = min => (min - primero * 60) / 60 * HH;
   const ahora = new Date(), minAhora = ahora.getHours() * 60 + ahora.getMinutes();
-  S.rjAhora = Math.max(0, px(minAhora) - HORA_ALTO * 1.5);
+  S.rjAhora = Math.max(0, px(minAhora) - HH * 1.5);
+  S.rjPrimera = primero; S.rjAlto = HH;
+  const cols = `grid-template-columns:46px repeat(${dias.length},minmax(0,1fr))`;
   const cab = dias.map(d => `<h3 class="${d === h ? 'es-hoy' : ''}" id="d-${d}"><span>${fmt(d, { weekday: 'short' }).replace('.', '')} ${aFecha(d).getDate()}${d === h ? ' · Hoy' : ''}</span>
       <button class="mas-dia" data-nuevo-dia="${d}" aria-label="Añadir el ${fechaLarga(d)}">${I.mas}</button></h3>`).join('');
+  const conSinHora = porDia.some(x => x.sinHora.length);
   const sin = porDia.map(x => `<div>${x.sinHora.map(tarjeta).join('')}</div>`).join('');
   const etiquetas = Array.from({ length: 24 - primero }, (_, k) => k + primero).map(hh =>
-    `<span style="top:${(hh - primero) * HORA_ALTO}px">${pad(hh)}:00</span>`).join('');
+    `<span style="top:${(hh - primero) * HH}px">${pad(hh)}:00</span>`).join('');
   const columnas = dias.map((d, i) => {
-    const bloques = colocar(porDia[i].bloques).map(bl => {
-      const top = px(bl.a), altura = Math.max(bl.b - bl.a, 0) / 60 * HORA_ALTO;
+    const bloques = colocar(porDia[i].bloques, HH).map(bl => {
+      const top = px(bl.a), altura = Math.max(bl.b - bl.a, 0) / 60 * HH;
       const corto = altura < 40;
       return `<div class="bloque${corto ? ' corto' : ''}${bl.ncol > 1 ? ' estrecho' : ''}" style="top:${top.toFixed(1)}px;height:${(Math.max(altura, 22) - 2).toFixed(1)}px;left:calc(${(bl.col / bl.ncol * 100).toFixed(3)}% + 2px);width:calc(${(100 / bl.ncol).toFixed(3)}% - 4px)">${tarjeta(bl.it)}</div>`;
     }).join('');
     const linea = d === h ? `<div class="ahora" id="ahora" style="top:${px(minAhora).toFixed(1)}px"></div>` : '';
-    return `<div class="rj-dia${d === h ? ' es-hoy' : ''}">${bloques}${linea}</div>`;
+    return `<div class="rj-dia${d === h && dias.length > 1 ? ' es-hoy' : ''}">${bloques}${linea}</div>`;
   }).join('');
-  S.rjPrimera = primero;
-  return `<div class="rj">
-    <div class="rj-fila rj-cab"><div></div>${cab}</div>
-    <div class="rj-fila rj-sin"><div class="rj-et">Sin hora</div>${sin}</div>
-    <div class="rj-scroll" id="rj-scroll"><div class="rj-fila rj-cuerpo" style="height:${alto}px"><div class="rj-horas">${etiquetas}</div>${columnas}</div></div>
+  return `<div class="rj" style="--hh:${HH}px">
+    ${cabecera ? `<div class="rj-fila rj-cab" style="${cols}"><div></div>${cab}</div>` : ''}
+    ${cabecera || conSinHora ? `<div class="rj-fila rj-sin" style="${cols}"><div class="rj-et">Sin hora</div>${sin}</div>` : ''}
+    <div class="rj-scroll" id="rj-scroll"><div class="rj-fila rj-cuerpo" style="${cols};height:${(24 - primero) * HH}px"><div class="rj-horas">${etiquetas}</div>${columnas}</div></div>
   </div>`;
 }
+
+/* Móvil: la semana en miniatura (barras por horas) para elegir el día */
+function miniSemana(dias, mapa, h, elegido) {
+  return `<div class="mini-semana" role="group" aria-label="Elegir día">${dias.map(d => {
+    const { sinHora, bloques } = tramosDia(mapa[d] || [], mapa[sumarDias(d, -1)] || []);
+    const barras = colocar(bloques, 60).map(bl => {
+      const q = bl.it.tipo === 'reg' ? bl.it.r.hechaPor : quienDe(bl.it.d);
+      return `<i class="p-${q}${bl.it.tipo === 'reg' ? ' ok' : ''}" style="top:${(bl.a / 14.4).toFixed(2)}%;height:${Math.max((bl.b - bl.a) / 14.4, 4).toFixed(2)}%;left:${(bl.col / bl.ncol * 100).toFixed(1)}%;width:${(100 / bl.ncol).toFixed(1)}%"></i>`;
+    }).join('');
+    const puntos = sinHora.slice(0, 4).map(it => `<b class="p-${it.tipo === 'reg' ? it.r.hechaPor : quienDe(it.d)}${it.atrasada ? ' atr' : ''}"></b>`).join('') + (sinHora.length > 4 ? '<small>+</small>' : '');
+    return `<button class="mini-dia${d === elegido ? ' sel' : ''}${d === h ? ' hoy' : ''}" data-elegir="${d}" aria-label="${fechaLarga(d)}" aria-pressed="${d === elegido}">
+      <span class="md-n">${DIAS_CORTOS[diaSemana(d)]}</span><span class="md-num">${aFecha(d).getDate()}</span>
+      <span class="md-puntos">${puntos}</span><span class="md-linea">${barras}</span></button>`;
+  }).join('')}</div>`;
+}
+
 /* Ajusta el alto de la rejilla a la pantalla y la deja en la hora actual (o donde estaba) */
 function ajustarRejilla() {
   const el = document.getElementById('rj-scroll');
@@ -848,6 +886,16 @@ function ajustarRejilla() {
   if (S.rjIr) { el.scrollTop = S.rjAhora || 0; S.rjIr = false; } else el.scrollTop = S.rjScroll || 0;
   S.rjScroll = el.scrollTop;
   el.onscroll = () => { S.rjScroll = el.scrollTop; };
+  if (!anchoTablet.matches) {
+    let x0 = null, y0 = null;
+    el.ontouchstart = e => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; };
+    el.ontouchend = e => {
+      if (x0 === null) return;
+      const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0;
+      x0 = null;
+      if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy) * 1.5) { S.cal.fecha = sumarDias(S.cal.fecha, dx < 0 ? 1 : -1); pintar(); }
+    };
+  }
 }
 window.addEventListener('resize', () => ajustarRejilla());
 
@@ -870,17 +918,16 @@ function vistaTablon() {
     const ini = lunesDe(c.fecha), fin = sumarDias(ini, 6);
     titulo = `${fechaCorta(ini)} – ${fechaCorta(fin)}`;
     const mapa = mapaTablon(sumarDias(ini, -1), fin);
-    if (anchoTablet.matches) cuerpo = semanaConHoras(ini, mapa, h);
-    else for (let i = 0; i < 7; i++) {
-      const d = sumarDias(ini, i);
-      const items = mapa[d] || [];
-      marcarSolapes(items);
-      cuerpo += `<section class="dia-col${d === h ? ' es-hoy' : ''}" id="d-${d}">
-        <h3><span><span class="corto">${fmt(d, { weekday: 'short' }).replace('.', '')} ${aFecha(d).getDate()}</span><span class="largo">${fechaLarga(d)}</span>${d === h ? ' · Hoy' : ''}</span>
+    const dias = Array.from({ length: 7 }, (_, i) => sumarDias(ini, i));
+    if (anchoTablet.matches) cuerpo = rejillaHoras(dias, mapa, h);
+    else {
+      const d = c.fecha;
+      cuerpo = `${miniSemana(dias, mapa, h, d)}
+        <div class="dia-movil"><h3 class="${d === h ? 'es-hoy' : ''}">${fechaLarga(d)}${d === h ? ' · Hoy' : ''}
           <button class="mas-dia" data-nuevo-dia="${d}" aria-label="Añadir el ${fechaLarga(d)}">${I.mas}</button></h3>
-        ${items.length ? `<div class="lista">${items.map(tarjeta).join('')}</div>` : '<p class="libre">Libre</p>'}</section>`;
+          ${rejillaHoras([d], mapa, h, { alto: HORA_ALTO_MOVIL, cabecera: false })}
+</div>`;
     }
-    if (!anchoTablet.matches) cuerpo = `<div class="semana">${cuerpo}</div>`;
   } else {
     const f = aFecha(c.fecha);
     const primero = ymd(new Date(f.getFullYear(), f.getMonth(), 1));
@@ -920,7 +967,7 @@ function vistaTablon() {
         <button class="icono" data-mover="1" aria-label="Siguiente">${I.der}</button>
         <button class="btn sec peq" data-irhoy>Hoy</button>
       </div>
-      <button class="btn sec peq btn-ico" data-todo>${I.lista}<span>Tareas y eventos</span></button>
+      <button class="btn sec peq btn-ico" data-todo aria-label="Tareas y eventos" title="Tareas y eventos">${I.lista}<span>Tareas y eventos</span></button>
     </div>
     ${cuerpo}`;
 }
@@ -1489,7 +1536,7 @@ function pintar() {
 }
 
 /* ---------- Eventos de la interfaz ---------- */
-const ACCIONES = '[data-cerrar],[data-completar],[data-occ],[data-registro],[data-editar],[data-vista],[data-modo],[data-persona],[data-mover],[data-irhoy],[data-dia],[data-nueva],[data-nuevo-dia],[data-cuenta],[data-todo],[data-borrar-el],' +
+const ACCIONES = '[data-cerrar],[data-completar],[data-occ],[data-registro],[data-editar],[data-vista],[data-modo],[data-persona],[data-mover],[data-irhoy],[data-dia],[data-nueva],[data-nuevo-dia],[data-cuenta],[data-todo],[data-borrar-el],[data-elegir],' +
   '[data-anadir],[data-sug],[data-habituales],[data-comprar],[data-item],[data-tienda-f],[data-tiendas],[data-quitar-comprados],' +
   '[data-peli],[data-nueva-peli],[data-ruleta],[data-ajustes-pelis],[data-pfestado]';
 app.addEventListener('input', e => {
@@ -1526,6 +1573,7 @@ document.addEventListener('click', e => {
   if (d.nuevoDia) return formularioElemento(null, d.nuevoDia);
   if ('cuenta' in d) return menuCuenta();
   if ('todo' in d) return hojaTodo();
+  if (d.elegir) { S.cal.fecha = d.elegir; return pintar(); }
   if (d.borrarEl) return borrarElemento(buscar(d.borrarEl));
   // compra
   if ('anadir' in d) return anadirDesdeBarra();
@@ -1967,7 +2015,7 @@ setInterval(() => {
   const reloj = document.getElementById('reloj');
   if (reloj) reloj.textContent = `${pad(ahora.getHours())}:${pad(ahora.getMinutes())}`;
   const linea = document.getElementById('ahora');
-  if (linea) linea.style.top = (((ahora.getHours() * 60 + ahora.getMinutes()) - S.rjPrimera * 60) / 60 * HORA_ALTO).toFixed(1) + 'px';
+  if (linea) linea.style.top = (((ahora.getHours() * 60 + ahora.getMinutes()) - S.rjPrimera * 60) / 60 * (S.rjAlto || HORA_ALTO)).toFixed(1) + 'px';
   if (hoy() !== ultimoDia) { ultimoDia = hoy(); pintar(); }
   if (S.tablet && sheet.classList.contains('hidden') && Date.now() - ultimaInteraccion > MINUTOS_VOLVER_A_HOY * 60000) {
     const fuera = S.vista !== 'tablon' || S.cal.modo !== 'semana' || lunesDe(S.cal.fecha) !== lunesDe(hoy()) || S.cal.persona !== 'todos';
