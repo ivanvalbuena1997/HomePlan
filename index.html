@@ -245,6 +245,41 @@ textarea{min-height:70px;resize:vertical}
 .puntero{position:absolute;left:50%;top:-6px;transform:translateX(-50%);width:0;height:0;border-left:14px solid transparent;border-right:14px solid transparent;border-top:24px solid var(--alerta);z-index:2;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25))}
 .resultado{text-align:center;font-weight:900;font-size:1.3rem;min-height:1.6em;margin:0 0 10px}
 
+/* Semana con horas (pantalla ancha) */
+.rj{--hh:36px;display:flex;flex-direction:column;gap:6px}
+.rj-fila{display:grid;grid-template-columns:46px repeat(7,minmax(0,1fr));gap:0 6px}
+.rj-cab h3{display:flex;align-items:center;justify-content:space-between;margin:0;font-size:1rem;font-weight:800;padding:0 2px}
+.rj-cab h3.es-hoy{color:var(--menta)}
+.rj-sin>div{background:var(--superficie);border:1px dashed var(--linea);border-radius:10px;padding:3px;min-height:14px;max-height:118px;overflow-y:auto;display:flex;flex-direction:column;gap:3px}
+.rj-sin .tarjeta{padding:3px 5px;gap:5px;border-left-width:4px;border-radius:8px}
+.rj-sin .check,.rj-sin .ev-ico{width:22px;height:22px;border-width:2px}
+.rj-sin .check svg{width:12px;height:12px}
+.rj-sin .ev-ico svg{width:15px;height:15px}
+.rj-sin .nombre{font-size:.8rem;line-height:1.15}
+.rj-sin .meta{font-size:.68rem;gap:0 6px}
+.rj-sin .rj-et{background:none;border:0;overflow:visible;font-size:.7rem;font-weight:800;color:var(--tinta-suave);justify-content:center;padding:0;text-align:right}
+.rj-scroll{overflow-y:auto;overscroll-behavior:contain;padding-top:8px}
+.rj-cuerpo{position:relative}
+.rj-horas{position:relative}
+.rj-horas span{position:absolute;right:4px;transform:translateY(-50%);font-size:.72rem;font-weight:800;color:var(--tinta-suave)}
+.rj-dia{position:relative;border:1px solid var(--linea);border-radius:10px;background:repeating-linear-gradient(to bottom,var(--linea) 0,var(--linea) 1px,transparent 1px,transparent var(--hh)),var(--superficie)}
+.rj-dia.es-hoy{border:2px solid var(--sol)}
+.bloque{position:absolute;z-index:1}
+.bloque .tarjeta{height:100%;overflow:hidden;overflow:clip;padding:3px 5px;gap:5px;border-left-width:4px;border-radius:8px;outline:1px solid var(--superficie)}
+.bloque .tarjeta>*{position:sticky;top:3px}
+.bloque .check,.bloque .ev-ico{width:22px;height:22px;border-width:2px}
+.bloque .check svg{width:12px;height:12px}
+.bloque .ev-ico svg{width:15px;height:15px}
+.bloque .nombre{font-size:.8rem;line-height:1.15;overflow-wrap:break-word}
+.bloque.estrecho .ev-ico{display:none}
+.bloque.estrecho .tarjeta{padding:3px 4px}
+.bloque .meta{font-size:.68rem;gap:0 6px}
+.bloque.corto .tarjeta{align-items:center}
+.bloque.corto .meta{display:none}
+.bloque.corto .nombre{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ahora{position:absolute;left:-2px;right:-2px;height:2px;background:var(--alerta);z-index:3;pointer-events:none}
+.ahora::before{content:"";position:absolute;left:-4px;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--alerta)}
+
 /* Pantalla ancha (tablet en horizontal): la semana entera en 7 columnas */
 @media (min-width: 900px){
   #app{max-width:none;padding:0 18px 96px}
@@ -300,7 +335,7 @@ const firebaseConfig = {
   measurementId: "G-G3KRG9DN75"
 };
 
-const VERSION_APP = '1.7.1';
+const VERSION_APP = '1.7.2';
 const PERSONAS = { ivan: { nombre: 'Iván' }, jen: { nombre: 'Jen' } };
 const CLAVE_TABLET = 'homeplan-tablet';
 const MINUTOS_VOLVER_A_HOY = 5;
@@ -390,7 +425,7 @@ const S = {
   tablet: tabletGuardada,
   vista: 'tablon',
   cal: { modo: 'semana', fecha: hoy(), persona: 'todos' },
-  irA: hoy(),
+  irA: hoy(), rjIr: true, rjScroll: 0,
   compraF: 'todas', compraTexto: '', compraCant: '', compraTienda: '',
   pelisF: { texto: '', estado: 'porver', tipo: 'todo', plataforma: 'todas', categoria: 'todas', puntos: 'todas', orden: 'recientes' }
 };
@@ -703,17 +738,116 @@ function tarjetaOcc(it) {
   return `<div class="tarjeta p-${q}${it.atrasada ? ' atrasada' : ''}${pasado ? ' pasado' : ''}">${izq}
     <div class="info" data-occ="${t.id}" data-orig="${o.orig}">
       <div class="nombre">${esc(d.nombre)}</div>
-      <div class="meta">${hora ? `<span class="hora">${hora}</span>` : ''}${etiquetaQuien(d)}${repite(t) ? '<span title="Se repite">↻</span>' : ''}${it.atrasada ? `<span class="rojo">Tocaba ${fechaRelativa(o.fecha)}</span>` : ''}</div>
+      <div class="meta">${hora ? `<span class="hora">${hora}</span>` : ''}${etiquetaQuien(d)}${repite(t) ? '<span title="Se repite">↻</span>' : ''}${it.atrasada ? `<span class="rojo">Tocaba ${fechaRelativa(o.fecha)}</span>` : ''}${it.solapa ? '<span class="rojo">Se solapa</span>' : ''}</div>
     </div></div>`;
 }
-function tarjetaReg(r) {
+function tarjetaReg(r, it = {}) {
   const hora = horaTexto(r);
   return `<div class="tarjeta hecha p-${r.hechaPor in PERSONAS || r.hechaPor === 'ambos' ? r.hechaPor : 'ambos'}">
     <span class="check lleno" aria-hidden="true">${I.ok}</span>
     <div class="info" data-registro="${r.id}"><div class="nombre">${esc(r.nombre)}</div>
-    <div class="meta">${hora ? `<span class="hora">${hora}</span>` : ''}<span>Hecha por ${nombreQuien(r.hechaPor)}</span>${r.prevista && r.prevista < r.fecha ? `<span>tocaba ${fechaCorta(r.prevista)}</span>` : ''}</div></div></div>`;
+    <div class="meta">${hora ? `<span class="hora">${hora}</span>` : ''}<span>Hecha por ${nombreQuien(r.hechaPor)}</span>${r.prevista && r.prevista < r.fecha ? `<span>tocaba ${fechaCorta(r.prevista)}</span>` : ''}${it.solapa ? '<span class="rojo">Se solapa</span>' : ''}</div></div></div>`;
 }
-const tarjeta = it => it.tipo === 'reg' ? tarjetaReg(it.r) : tarjetaOcc(it);
+const tarjeta = it => it.tipo === 'reg' ? tarjetaReg(it.r, it) : tarjetaOcc(it);
+
+/* ---------- Horas: tramos de cada día y columnas cuando se solapan ---------- */
+const HORA_ALTO = 36, HORA_INICIO = 7, MIN_VISIBLE = 30;
+const aMin = s => { const [h, m] = String(s).split(':').map(Number); return (h || 0) * 60 + (m || 0); };
+const horasDe = it => it.tipo === 'reg' ? it.r : it.d;
+/* Separa lo que tiene hora (bloques en minutos del día) de lo que no.
+   Lo que pasa de medianoche se corta a las 24:00 y sigue al día siguiente (prev = cosas del día anterior). */
+function tramosDia(items, prev) {
+  const sinHora = [], bloques = [];
+  for (const it of items) {
+    const x = horasDe(it);
+    if (!x.horaInicio || it.atrasada) { sinHora.push(it); continue; }
+    const a = aMin(x.horaInicio);
+    let b, sinFin = false;
+    if (x.horaFin) { b = aMin(x.horaFin); if (b === a) b = a + MIN_VISIBLE; else if (b < a) b = 1440; }
+    else { b = Math.min(a + MIN_VISIBLE, 1440); sinFin = true; }
+    bloques.push({ it, a, b, sinFin });
+  }
+  for (const it of prev || []) {
+    const x = horasDe(it);
+    if (it.atrasada || !x.horaInicio || !x.horaFin) continue;
+    const f = aMin(x.horaFin);
+    if (f > 0 && f < aMin(x.horaInicio)) bloques.push({ it, a: 0, b: f, sigue: true });
+  }
+  return { sinHora, bloques };
+}
+/* Reparte en columnas los bloques que coinciden en el tiempo */
+function colocar(bloques) {
+  const minimo = Math.round(22 / HORA_ALTO * 60); // alto mínimo visible, en minutos
+  const fin = bl => Math.max(bl.b, bl.a + minimo);
+  const xs = [...bloques].sort((x, y) => x.a - y.a || fin(y) - fin(x));
+  let grupo = [], finGrupo = -1;
+  const cerrar = () => {
+    const cols = [];
+    for (const bl of grupo) {
+      let i = cols.findIndex(f => f <= bl.a);
+      if (i < 0) { i = cols.length; cols.push(0); }
+      cols[i] = fin(bl); bl.col = i;
+    }
+    grupo.forEach(bl => { bl.ncol = cols.length; });
+  };
+  for (const bl of xs) {
+    if (grupo.length && bl.a >= finGrupo) { cerrar(); grupo = []; finGrupo = -1; }
+    grupo.push(bl); finGrupo = Math.max(finGrupo, fin(bl));
+  }
+  if (grupo.length) cerrar();
+  return xs;
+}
+/* Marca las cosas de un día que coinciden en horario con otra (para la lista del móvil) */
+function marcarSolapes(items) {
+  const { bloques } = tramosDia(items);
+  const real = bloques.map(bl => ({ ...bl, b: bl.sinFin ? bl.a + 1 : bl.b }));
+  for (let i = 0; i < real.length; i++) for (let j = i + 1; j < real.length; j++) {
+    const x = real[i], y = real[j];
+    if (x.a < y.b && y.a < x.b) { x.it.solapa = true; y.it.solapa = true; }
+  }
+}
+
+function semanaConHoras(ini, mapa, h) {
+  const dias = Array.from({ length: 7 }, (_, i) => sumarDias(ini, i));
+  const porDia = dias.map(d => tramosDia(mapa[d] || [], mapa[sumarDias(d, -1)] || []));
+  const primero = Math.min(HORA_INICIO, ...porDia.flatMap(x => x.bloques.map(bl => Math.floor(bl.a / 60))));
+  const alto = (24 - primero) * HORA_ALTO;
+  const px = min => (min - primero * 60) / 60 * HORA_ALTO;
+  const ahora = new Date(), minAhora = ahora.getHours() * 60 + ahora.getMinutes();
+  S.rjAhora = Math.max(0, px(minAhora) - HORA_ALTO * 1.5);
+  const cab = dias.map(d => `<h3 class="${d === h ? 'es-hoy' : ''}" id="d-${d}"><span>${fmt(d, { weekday: 'short' }).replace('.', '')} ${aFecha(d).getDate()}${d === h ? ' · Hoy' : ''}</span>
+      <button class="mas-dia" data-nuevo-dia="${d}" aria-label="Añadir el ${fechaLarga(d)}">${I.mas}</button></h3>`).join('');
+  const sin = porDia.map(x => `<div>${x.sinHora.map(tarjeta).join('')}</div>`).join('');
+  const etiquetas = Array.from({ length: 24 - primero }, (_, k) => k + primero).map(hh =>
+    `<span style="top:${(hh - primero) * HORA_ALTO}px">${pad(hh)}:00</span>`).join('');
+  const columnas = dias.map((d, i) => {
+    const bloques = colocar(porDia[i].bloques).map(bl => {
+      const top = px(bl.a), altura = Math.max(bl.b - bl.a, 0) / 60 * HORA_ALTO;
+      const corto = altura < 40;
+      return `<div class="bloque${corto ? ' corto' : ''}${bl.ncol > 1 ? ' estrecho' : ''}" style="top:${top.toFixed(1)}px;height:${(Math.max(altura, 22) - 2).toFixed(1)}px;left:calc(${(bl.col / bl.ncol * 100).toFixed(3)}% + 2px);width:calc(${(100 / bl.ncol).toFixed(3)}% - 4px)">${tarjeta(bl.it)}</div>`;
+    }).join('');
+    const linea = d === h ? `<div class="ahora" id="ahora" style="top:${px(minAhora).toFixed(1)}px"></div>` : '';
+    return `<div class="rj-dia${d === h ? ' es-hoy' : ''}">${bloques}${linea}</div>`;
+  }).join('');
+  S.rjPrimera = primero;
+  return `<div class="rj">
+    <div class="rj-fila rj-cab"><div></div>${cab}</div>
+    <div class="rj-fila rj-sin"><div class="rj-et">Sin hora</div>${sin}</div>
+    <div class="rj-scroll" id="rj-scroll"><div class="rj-fila rj-cuerpo" style="height:${alto}px"><div class="rj-horas">${etiquetas}</div>${columnas}</div></div>
+  </div>`;
+}
+/* Ajusta el alto de la rejilla a la pantalla y la deja en la hora actual (o donde estaba) */
+function ajustarRejilla() {
+  const el = document.getElementById('rj-scroll');
+  if (!el) return;
+  const nav = document.querySelector('nav.tabs');
+  const libre = window.innerHeight - el.getBoundingClientRect().top - (nav ? nav.offsetHeight : 70) - 10;
+  el.style.maxHeight = Math.max(260, libre) + 'px';
+  if (S.rjIr) { el.scrollTop = S.rjAhora || 0; S.rjIr = false; } else el.scrollTop = S.rjScroll || 0;
+  S.rjScroll = el.scrollTop;
+  el.onscroll = () => { S.rjScroll = el.scrollTop; };
+}
+window.addEventListener('resize', () => ajustarRejilla());
 
 /* ---------- Pantalla: Tablón ---------- */
 function resumenHoy() {
@@ -733,16 +867,18 @@ function vistaTablon() {
   if (c.modo === 'semana') {
     const ini = lunesDe(c.fecha), fin = sumarDias(ini, 6);
     titulo = `${fechaCorta(ini)} – ${fechaCorta(fin)}`;
-    const mapa = mapaTablon(ini, fin);
-    for (let i = 0; i < 7; i++) {
+    const mapa = mapaTablon(sumarDias(ini, -1), fin);
+    if (anchoTablet.matches) cuerpo = semanaConHoras(ini, mapa, h);
+    else for (let i = 0; i < 7; i++) {
       const d = sumarDias(ini, i);
       const items = mapa[d] || [];
+      marcarSolapes(items);
       cuerpo += `<section class="dia-col${d === h ? ' es-hoy' : ''}" id="d-${d}">
         <h3><span><span class="corto">${fmt(d, { weekday: 'short' }).replace('.', '')} ${aFecha(d).getDate()}</span><span class="largo">${fechaLarga(d)}</span>${d === h ? ' · Hoy' : ''}</span>
           <button class="mas-dia" data-nuevo-dia="${d}" aria-label="Añadir el ${fechaLarga(d)}">${I.mas}</button></h3>
         ${items.length ? `<div class="lista">${items.map(tarjeta).join('')}</div>` : '<p class="libre">Libre</p>'}</section>`;
     }
-    cuerpo = `<div class="semana">${cuerpo}</div>`;
+    if (!anchoTablet.matches) cuerpo = `<div class="semana">${cuerpo}</div>`;
   } else {
     const f = aFecha(c.fecha);
     const primero = ymd(new Date(f.getFullYear(), f.getMonth(), 1));
@@ -983,7 +1119,7 @@ function formularioHabituales() {
 /* =====================================================================
    Películas y series
    Colección pelis { titulo, tipo: peli|serie, descripcion, plataforma, categorias[], votos { ivan: 0-10, jen: 0-10 },
-                     estado: pendiente|viendo|vista, episodios, progreso { episodio, minuto }, creado }
+                     estado: pendiente|viendo|vista, temporadas, episodios (en total), progreso { temporada, episodio, minuto }, creado }
    ajustes/pelis { plataformas[], categorias[] }
    ===================================================================== */
 const ESTADOS_PELI = [['pendiente', 'Pendiente'], ['viendo', 'Viendo'], ['vista', 'Vista']];
@@ -1017,8 +1153,10 @@ function progresoTexto(p) {
   const pr = p.progreso || {};
   const ep = parseInt(pr.episodio, 10) || 0, min = parseInt(pr.minuto, 10) || 0;
   if (p.tipo === 'serie') {
-    if (!ep && !min) return p.episodios ? `${p.episodios} episodios` : '';
-    return `Vamos por el episodio ${ep || 1}${p.episodios ? ` de ${p.episodios}` : ''}${min ? `, minuto ${min}` : ''}`;
+    const tem = parseInt(pr.temporada, 10) || 0, nt = parseInt(p.temporadas, 10) || 0;
+    if (!ep && !min) return [nt ? `${nt} temporada${nt > 1 ? 's' : ''}` : '', p.episodios ? `${p.episodios} episodios` : ''].filter(Boolean).join(' · ');
+    const donde = tem ? `la temporada ${tem}${nt ? ` de ${nt}` : ''}, episodio ${ep || 1}` : `el episodio ${ep || 1}${p.episodios ? ` de ${p.episodios}` : ''}`;
+    return `Vamos por ${donde}${min ? `, minuto ${min}` : ''}`;
   }
   return min ? `Vamos por el minuto ${min}` : '';
 }
@@ -1089,6 +1227,8 @@ function fichaPeli(p) {
   const pr = p.progreso || {};
   let ep = parseInt(pr.episodio, 10) || 0;
   const serie = p.tipo === 'serie';
+  const nTem = serie ? parseInt(p.temporadas, 10) || 0 : 0;
+  let tem = Math.min(parseInt(pr.temporada, 10) || 1, nTem || 1);
   const guardar = (cambios, texto) => {
     FB.updateDoc(FB.doc(db, 'pelis', p.id), cambios).catch(alError);
     if (texto) avisar(texto);
@@ -1102,9 +1242,12 @@ function fichaPeli(p) {
     <div class="campo"><span class="lbl">Estado</span><div class="seg" id="pf-estado">${ESTADOS_PELI.map(([k, n]) => `<button type="button" data-r="${k}" aria-pressed="${(p.estado || 'pendiente') === k}">${n}</button>`).join('')}</div></div>
     <div class="campo" style="background:var(--superficie);border:1px solid var(--linea);border-radius:var(--radio);padding:12px">
       <span class="lbl">Dónde nos hemos quedado</span>
+      ${nTem ? `<div class="fila2" style="margin-bottom:8px"><span style="font-weight:700">Temporada</span>
+        <div class="contador" style="flex:none"><button type="button" class="icono" id="pf-tmenos" aria-label="Temporada anterior">−</button><span class="num" id="pf-tem">${tem}</span><button type="button" class="icono" id="pf-tmas" aria-label="Temporada siguiente">+</button></div>
+        <span class="nota" style="flex:none">de ${nTem}</span></div>` : ''}
       ${serie ? `<div class="fila2" style="margin-bottom:8px"><span style="font-weight:700">Episodio</span>
         <div class="contador" style="flex:none"><button type="button" class="icono" id="pf-menos" aria-label="Episodio anterior">−</button><span class="num" id="pf-ep">${ep || 1}</span><button type="button" class="icono" id="pf-mas" aria-label="Episodio siguiente">+</button></div>
-        <span class="nota" style="flex:none">${p.episodios ? `de ${p.episodios}` : ''}</span></div>` : ''}
+        <span class="nota" style="flex:none">${p.episodios && !nTem ? `de ${p.episodios}` : ''}</span></div>` : ''}
       <div class="fila2"><label for="pf-min" style="font-weight:700;flex:none;margin:0">Minuto</label><input type="number" id="pf-min" min="0" max="999" value="${esc(pr.minuto || '')}" placeholder="0"></div>
       <button class="btn ok ancho" id="pf-guardar" style="margin-top:10px">Guardar dónde nos quedamos</button>
     </div>
@@ -1122,12 +1265,18 @@ function fichaPeli(p) {
   });
   activarSeg('pf-estado', r => guardar({ estado: r }, `Marcada como ${nombreEstado(r).toLowerCase()}`));
   if (serie) {
-    const max = parseInt(p.episodios, 10) || 9999;
+    // con temporadas, el episodio se cuenta dentro de cada temporada
+    const max = nTem ? 9999 : (parseInt(p.episodios, 10) || 9999);
+    if (nTem) {
+      const ponTem = n => { tem = n; ep = 1; $('#pf-tem').textContent = tem; $('#pf-ep').textContent = ep; $('#pf-min').value = ''; };
+      $('#pf-tmenos').onclick = () => tem > 1 && ponTem(tem - 1);
+      $('#pf-tmas').onclick = () => tem < nTem && ponTem(tem + 1);
+    }
     $('#pf-menos').onclick = () => { ep = Math.max(1, ep - 1); $('#pf-ep').textContent = ep; };
     $('#pf-mas').onclick = () => { ep = Math.min(max, ep + 1); $('#pf-ep').textContent = ep; $('#pf-min').value = ''; };
   }
   $('#pf-guardar').onclick = () => {
-    const progreso = { episodio: serie ? ep : null, minuto: parseInt($('#pf-min').value, 10) || 0 };
+    const progreso = { temporada: nTem ? tem : null, episodio: serie ? ep : null, minuto: parseInt($('#pf-min').value, 10) || 0 };
     const cambios = { progreso };
     if ((p.estado || 'pendiente') === 'pendiente') cambios.estado = 'viendo';
     guardar(cambios, 'Guardado dónde os quedasteis');
@@ -1157,7 +1306,9 @@ function formularioPeli(p) {
       <input type="text" id="pe-plat-otra" placeholder="Otra plataforma" maxlength="30" style="margin-top:8px" value="${plataforma && !L.plataformas.includes(plataforma) ? esc(plataforma) : ''}"></div>
     <div class="campo"><span class="lbl">Categorías</span><div class="sugs" id="pe-cats" style="margin:0">${chipsCat()}</div>
       <div class="fila2" style="margin-top:8px"><input type="text" id="pe-cat-nueva" placeholder="Nueva categoría" maxlength="30"><button type="button" class="btn sec" id="pe-cat-anadir" style="flex:none">Añadir</button></div></div>
-    <div class="campo${tipo === 'serie' ? '' : ' hidden'}" id="pe-eps-c"><label for="pe-eps">Número de episodios</label><input type="number" id="pe-eps" min="1" max="9999" value="${esc(v.episodios || '')}" placeholder="Opcional"></div>
+    <div class="campo${tipo === 'serie' ? '' : ' hidden'}" id="pe-eps-c"><div class="fila2" style="align-items:flex-start">
+      <div><label for="pe-tem" class="lbl">Temporadas</label><input type="number" id="pe-tem" min="1" max="99" value="${esc(v.temporadas || '')}" placeholder="Opcional"></div>
+      <div><label for="pe-eps" class="lbl">Episodios en total</label><input type="number" id="pe-eps" min="1" max="9999" value="${esc(v.episodios || '')}" placeholder="Opcional"></div></div></div>
     <div class="campo"><span class="lbl">Estado</span><div class="seg" id="pe-estado">${ESTADOS_PELI.map(([k, n]) => `<button type="button" data-r="${k}" aria-pressed="${estado === k}">${n}</button>`).join('')}</div></div>
     <div class="campo"><span class="lbl">Puntuación (1 a 10, opcional)</span>${votoHTML('pe-v-ivan', 'ivan', votos.ivan)}${votoHTML('pe-v-jen', 'jen', votos.jen)}</div>
     <div class="acciones"><button class="btn sec" data-cerrar>Cancelar</button><button class="btn" id="pe-guardar">Guardar</button></div>`);
@@ -1200,10 +1351,11 @@ function formularioPeli(p) {
     const plat = otra || plataforma;
     const datos = {
       titulo, tipo, descripcion: $('#pe-desc').value.trim(), plataforma: plat, categorias: cats,
-      votos, estado, episodios: tipo === 'serie' ? (parseInt($('#pe-eps').value, 10) || null) : null
+      votos, estado, episodios: tipo === 'serie' ? (parseInt($('#pe-eps').value, 10) || null) : null,
+      temporadas: tipo === 'serie' ? (parseInt($('#pe-tem').value, 10) || null) : null
     };
     const op = nueva
-      ? FB.addDoc(FB.collection(db, 'pelis'), { ...datos, progreso: { episodio: null, minuto: 0 }, creado: FB.serverTimestamp(), creadoPor: S.tablet ? 'tablet' : S.yo })
+      ? FB.addDoc(FB.collection(db, 'pelis'), { ...datos, progreso: { temporada: null, episodio: null, minuto: 0 }, creado: FB.serverTimestamp(), creadoPor: S.tablet ? 'tablet' : S.yo })
       : FB.updateDoc(FB.doc(db, 'pelis', p.id), datos);
     op.catch(alError);
     // las plataformas y categorías nuevas quedan guardadas para la próxima vez
@@ -1325,6 +1477,7 @@ function pintar() {
     const el = document.getElementById(foco.id);
     if (el) { el.focus({ preventScroll: true }); try { el.setSelectionRange(foco.ini, foco.fin); } catch (e) { /* no aplica */ } }
   }
+  if (S.vista === 'tablon') ajustarRejilla();
   if (S.irA && S.vista === 'tablon') {
     const destino = document.getElementById('d-' + S.irA);
     S.irA = null;
@@ -1362,11 +1515,11 @@ document.addEventListener('click', e => {
   if (d.occ) return fichaOcurrencia(buscar(d.occ), d.orig);
   if (d.registro) return formularioRegistro(S.registro.find(r => r.id === d.registro));
   if (d.editar) return formularioElemento(buscar(d.editar));
-  if (d.vista) { S.vista = d.vista; window.scrollTo(0, 0); return pintar(); }
-  if (d.modo) { S.cal.modo = d.modo; return pintar(); }
+  if (d.vista) { S.vista = d.vista; S.rjIr = true; window.scrollTo(0, 0); return pintar(); }
+  if (d.modo) { S.cal.modo = d.modo; S.rjIr = true; return pintar(); }
   if (d.persona) { S.cal.persona = d.persona; return pintar(); }
-  if ('irhoy' in d) { S.cal.fecha = hoy(); S.irA = hoy(); return pintar(); }
-  if (d.dia) { S.cal.fecha = d.dia; S.cal.modo = 'semana'; S.irA = d.dia; window.scrollTo(0, 0); return pintar(); }
+  if ('irhoy' in d) { S.cal.fecha = hoy(); S.irA = hoy(); S.rjIr = true; return pintar(); }
+  if (d.dia) { S.cal.fecha = d.dia; S.cal.modo = 'semana'; S.irA = d.dia; S.rjIr = true; window.scrollTo(0, 0); return pintar(); }
   if ('nueva' in d) return formularioElemento(null);
   if (d.nuevoDia) return formularioElemento(null, d.nuevoDia);
   if ('cuenta' in d) return menuCuenta();
@@ -1389,6 +1542,7 @@ document.addEventListener('click', e => {
   if (d.mover) {
     const n = parseInt(d.mover, 10), c = S.cal;
     c.fecha = c.modo === 'semana' ? sumarDias(c.fecha, 7 * n) : sumarMeses(c.fecha, n);
+    S.rjIr = true;
     return pintar();
   }
 });
@@ -1789,10 +1943,12 @@ setInterval(() => {
   const ahora = new Date();
   const reloj = document.getElementById('reloj');
   if (reloj) reloj.textContent = `${pad(ahora.getHours())}:${pad(ahora.getMinutes())}`;
+  const linea = document.getElementById('ahora');
+  if (linea) linea.style.top = (((ahora.getHours() * 60 + ahora.getMinutes()) - S.rjPrimera * 60) / 60 * HORA_ALTO).toFixed(1) + 'px';
   if (hoy() !== ultimoDia) { ultimoDia = hoy(); pintar(); }
   if (S.tablet && sheet.classList.contains('hidden') && Date.now() - ultimaInteraccion > MINUTOS_VOLVER_A_HOY * 60000) {
     const fuera = S.vista !== 'tablon' || S.cal.modo !== 'semana' || lunesDe(S.cal.fecha) !== lunesDe(hoy()) || S.cal.persona !== 'todos';
-    if (fuera) { S.vista = 'tablon'; S.cal = { modo: 'semana', fecha: hoy(), persona: 'todos' }; pintar(); window.scrollTo(0, 0); }
+    if (fuera || S.vista === 'tablon') { S.vista = 'tablon'; S.cal = { modo: 'semana', fecha: hoy(), persona: 'todos' }; S.rjIr = true; pintar(); window.scrollTo(0, 0); }
     ultimaInteraccion = Date.now();
   }
 }, 20000);
