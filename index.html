@@ -184,6 +184,60 @@ textarea{min-height:70px;resize:vertical}
 .eleccion{display:flex;gap:12px;margin-top:6px}
 .eleccion button{border:0;border-radius:18px;padding:18px 26px;font-weight:900;font-size:1.2rem;color:#fff}
 
+/* Títulos de pestaña */
+.titulo-vista{font-weight:900;font-size:1.7rem;letter-spacing:-.03em;margin:8px 0 12px}
+
+/* Lista de la compra */
+.anadir{background:var(--azulejo);border-radius:20px;padding:12px;margin-bottom:12px}
+.fila-anadir{display:grid;grid-template-columns:90px 1fr auto;gap:8px}
+.fila-anadir #c-nombre{grid-column:1 / -1}
+.cab-vista{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.cab-vista .botones{display:flex;gap:8px}
+.sugs{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;align-items:center}
+.sugs .lbl{margin:0 4px 0 0;font-size:.82rem;color:var(--tinta-suave)}
+.sug{border:1px solid var(--linea);background:var(--superficie);border-radius:999px;padding:6px 12px;font-weight:800;font-size:.9rem}
+.sug small{font-weight:600;color:var(--tinta-suave);margin-left:4px}
+.enlace{border:0;background:none;color:var(--tinta-suave);font-weight:700;text-decoration:underline;padding:6px;font-size:.85rem}
+.tiendas-f{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;flex:1 1 100%;min-width:0;scrollbar-width:none}
+.tiendas-f button{flex:none;border:1px solid var(--linea);background:var(--superficie);border-radius:999px;padding:8px 14px;font-weight:800;font-size:.9rem;color:var(--tinta-suave)}
+.tiendas-f button[aria-pressed="true"]{background:var(--tinta);color:var(--papel);border-color:var(--tinta)}
+.compra-grupos{display:flex;flex-direction:column}
+.tienda-grupo h2{margin-top:16px}
+.item{display:flex;gap:12px;align-items:center;background:var(--superficie);border:1px solid var(--linea);border-radius:14px;padding:10px 12px}
+.item .check{width:34px;height:34px}
+.item.comprado{opacity:.55}
+.item.comprado .nombre{text-decoration:line-through}
+.fila-edit{display:flex;gap:6px;align-items:center;margin-bottom:8px}
+.fila-edit input,.fila-edit select{flex:1;min-width:0}
+
+/* Películas y series */
+.filtros-pelis{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.filtros-pelis .seg,.filtros-pelis #p-buscar{grid-column:1 / -1}
+.pelis-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.peli{background:var(--superficie);border:1px solid var(--linea);border-radius:16px;padding:12px 14px;cursor:pointer;display:flex;flex-direction:column;gap:5px;min-width:0}
+.peli.vista{opacity:.7}
+.peli-tit{font-weight:900;font-size:1.08rem;line-height:1.2;overflow-wrap:anywhere}
+.pills{display:flex;flex-wrap:wrap;gap:5px}
+.pill{font-size:.75rem;font-weight:800;border-radius:999px;padding:2px 9px;background:var(--azulejo);color:var(--tinta)}
+.pill.plat{background:var(--tinta);color:var(--papel)}
+.pill.viendo{background:var(--sol);color:#17303A}
+.pill.vista{background:var(--menta);color:#fff}
+.pill.cat{background:transparent;border:1px solid var(--linea);color:var(--tinta-suave)}
+.estrellas{color:var(--sol);letter-spacing:1px;font-size:1rem;line-height:1}
+.estrellas .apagada{color:var(--linea)}
+.progreso{font-size:.88rem;font-weight:800;color:var(--menta)}
+.desc{font-size:.88rem;color:var(--tinta-suave);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.estrellas-btn{display:flex;gap:4px}
+.estrellas-btn button{border:0;background:none;font-size:2rem;line-height:1;padding:2px;color:var(--linea)}
+.estrellas-btn button.on{color:var(--sol)}
+.contador{display:flex;align-items:center;gap:10px}
+.contador .num{font-weight:900;font-size:1.4rem;min-width:3ch;text-align:center}
+.rueda{position:relative;width:min(320px,86vw);margin:6px auto 12px}
+.rueda-svg{width:100%;height:auto;display:block}
+.rueda-svg g{transition:none}
+.puntero{position:absolute;left:50%;top:-6px;transform:translateX(-50%);width:0;height:0;border-left:14px solid transparent;border-right:14px solid transparent;border-top:24px solid var(--alerta);z-index:2;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25))}
+.resultado{text-align:center;font-weight:900;font-size:1.3rem;min-height:1.6em;margin:0 0 10px}
+
 /* Pantalla ancha (tablet en horizontal): la semana entera en 7 columnas */
 @media (min-width: 900px){
   #app{max-width:none;padding:0 18px 96px}
@@ -208,6 +262,12 @@ textarea{min-height:70px;resize:vertical}
   .celda .marcas{flex-direction:column;flex-wrap:nowrap;gap:2px}
   .mini{width:auto;height:auto;border-radius:5px;background:var(--pc-suave);border-left:3px solid var(--pc);font-size:.72rem;font-weight:700;padding:0 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--tinta)}
   .mini.ok{outline:0;text-decoration:line-through;opacity:.65}
+  .compra-grupos{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:4px 14px;align-items:start}
+  .fila-anadir{grid-template-columns:2fr 1fr 1fr auto}
+  .fila-anadir #c-nombre{grid-column:auto}
+  .filtros-pelis{grid-template-columns:2fr repeat(5,1fr)}
+  .filtros-pelis #p-buscar{grid-column:auto}
+  .tiendas-f{flex:1 1 0}
 }
 
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
@@ -220,7 +280,7 @@ textarea{min-height:70px;resize:vertical}
 
 <script type="module">
 /* =====================================================================
-   HomePlan v1.6 — Tablón
+   HomePlan v1.7 — Tablón, Películas y series, Lista de la compra
    ===================================================================== */
 const FIREBASE_VERSION = '12.19.0';
 const firebaseConfig = {
@@ -233,7 +293,7 @@ const firebaseConfig = {
   measurementId: "G-G3KRG9DN75"
 };
 
-const VERSION_APP = '1.6';
+const VERSION_APP = '1.7';
 const PERSONAS = { ivan: { nombre: 'Iván' }, jen: { nombre: 'Jen' } };
 const CLAVE_TABLET = 'homeplan-tablet';
 const MINUTOS_VOLVER_A_HOY = 5;
@@ -319,10 +379,17 @@ let tabletGuardada = false;
 try { tabletGuardada = localStorage.getItem(CLAVE_TABLET) === '1'; } catch (e) { /* sin almacenamiento */ }
 const S = {
   usuario: null, yo: null, tareas: [], registro: [],
+  compra: [], tiendas: [], productos: [], pelis: [], ajustesPelis: null,
   tablet: tabletGuardada,
   vista: 'tablon',
   cal: { modo: 'semana', fecha: hoy(), persona: 'todos' },
-  irA: hoy()
+  irA: hoy(),
+  compraF: 'todas', compraTexto: '', compraCant: '', compraTienda: '',
+  pelisF: { texto: '', estado: 'porver', tipo: 'todo', plataforma: 'todas', categoria: 'todas', puntos: 'todas', orden: 'recientes' }
+};
+const AJUSTES_PELIS_INICIALES = {
+  plataformas: ['Netflix', 'Prime Video', 'Disney+', 'HBO Max', 'Movistar Plus+', 'Filmin', 'Apple TV+'],
+  categorias: ['Acción', 'Animación', 'Ciencia ficción', 'Comedia', 'Documental', 'Drama', 'Fantasía', 'Romántica', 'Terror', 'Thriller']
 };
 let FB = null, db = null, auth = null, desuscribir = [];
 
@@ -425,6 +492,27 @@ function escucharDatos() {
       const x = d.data({ serverTimestamps: 'estimate' });
       return { id: d.id, ...x, _ts: x.ts?.toMillis?.() ?? Date.now() };
     }).sort((a, b) => a.fecha === b.fecha ? b._ts - a._ts : (a.fecha < b.fecha ? 1 : -1));
+    pintar();
+  }, alError));
+  // v1.7: compra y películas
+  const escuchar = (col, campo, orden) => desuscribir.push(FB.onSnapshot(FB.collection(db, col), snap => {
+    S[campo] = snap.docs.map(d => {
+      const x = d.data({ serverTimestamps: 'estimate' });
+      return { id: d.id, ...x, _ts: x.creado?.toMillis?.() ?? Date.now() };
+    });
+    if (orden) S[campo].sort(orden);
+    pintar();
+  }, alError));
+  escuchar('compra', 'compra');
+  escuchar('tiendas', 'tiendas', (a, b) => (a.orden ?? 0) - (b.orden ?? 0) || a.nombre.localeCompare(b.nombre, 'es'));
+  escuchar('productos', 'productos');
+  escuchar('pelis', 'pelis');
+  desuscribir.push(FB.onSnapshot(FB.doc(db, 'ajustes', 'pelis'), snap => {
+    if (snap.exists()) S.ajustesPelis = { ...AJUSTES_PELIS_INICIALES, ...snap.data() };
+    else {
+      S.ajustesPelis = { ...AJUSTES_PELIS_INICIALES };
+      if (!snap.metadata.fromCache) FB.setDoc(FB.doc(db, 'ajustes', 'pelis'), AJUSTES_PELIS_INICIALES).catch(alError);
+    }
     pintar();
   }, alError));
   mantenerPantalla();
@@ -692,25 +780,519 @@ function vistaTablon() {
     ${cuerpo}`;
 }
 
-const vistaProximamente = nombre => `<div class="vacio grande">${nombre} llega en la próxima actualización (v1.7).</div>`;
+/* =====================================================================
+   Lista de la compra
+   Colecciones: compra { nombre, cantidad, tiendaId, comprado, creado, creadoPor }
+                tiendas { nombre, orden }
+                productos/{nombre normalizado} { nombre, tiendaId, veces, ultimo }  (sugerencias)
+   ===================================================================== */
+const normal = s => String(s || '').trim().toLowerCase().replace(/\s+/g, ' ');
+const idProducto = s => encodeURIComponent(normal(s)).slice(0, 400) || 'x';
+const tiendaDe = i => (i.tiendaId && S.tiendas.some(t => t.id === i.tiendaId)) ? i.tiendaId : 'sin';
+const nombreTienda = id => S.tiendas.find(t => t.id === id)?.nombre || 'Sin tienda';
+const opcionesTienda = sel => `<option value=""${!sel ? ' selected' : ''}>Sin tienda</option>` +
+  S.tiendas.map(t => `<option value="${t.id}"${sel === t.id ? ' selected' : ''}>${esc(t.nombre)}</option>`).join('');
+
+function sugerenciasHTML(texto) {
+  const enLista = new Set(S.compra.filter(i => !i.comprado).map(i => normal(i.nombre)));
+  const q = normal(texto);
+  let xs = S.productos.filter(p => p.nombre && !enLista.has(normal(p.nombre)));
+  if (q) xs = xs.filter(p => normal(p.nombre).includes(q));
+  xs.sort((a, b) => (q ? (normal(a.nombre).startsWith(q) ? 0 : 1) - (normal(b.nombre).startsWith(q) ? 0 : 1) : 0) ||
+    (b.veces || 0) - (a.veces || 0) || a.nombre.localeCompare(b.nombre, 'es'));
+  xs = xs.slice(0, q ? 8 : 16);
+  if (!xs.length) return '';
+  return `<span class="lbl">${q ? 'Sugerencias' : 'Habituales'}</span>` +
+    xs.map(p => `<button class="sug" data-sug="${esc(p.id)}">+ ${esc(p.nombre)}${p.tiendaId && S.tiendas.some(t => t.id === p.tiendaId) ? `<small>${esc(nombreTienda(p.tiendaId))}</small>` : ''}</button>`).join('') +
+    (q ? '' : '<button class="enlace" data-habituales>Editar</button>');
+}
+
+function filaCompra(i) {
+  return `<div class="item${i.comprado ? ' comprado' : ''}">
+    <button class="check${i.comprado ? ' lleno' : ''}" data-comprar="${i.id}" aria-label="${i.comprado ? 'Desmarcar' : 'Marcar como comprado'} ${esc(i.nombre)}">${I.ok}</button>
+    <div class="info" data-item="${i.id}"><div class="nombre">${esc(i.nombre)}</div>${i.cantidad ? `<div class="meta">${esc(i.cantidad)}</div>` : ''}</div></div>`;
+}
+
+function vistaCompra() {
+  const f = S.compraF;
+  const grupos = [...S.tiendas.map(t => ({ id: t.id, nombre: t.nombre })), { id: 'sin', nombre: 'Sin tienda' }];
+  const comprados = S.compra.filter(i => i.comprado).length;
+  let cuerpo = '';
+  for (const g of grupos) {
+    if (f !== 'todas' && f !== g.id) continue;
+    const items = S.compra.filter(i => tiendaDe(i) === g.id)
+      .sort((a, b) => (a.comprado ? 1 : 0) - (b.comprado ? 1 : 0) || a.nombre.localeCompare(b.nombre, 'es'));
+    if (!items.length && f === 'todas') continue;
+    cuerpo += `<section class="tienda-grupo"><h2>${esc(g.nombre)} <span class="n">${items.filter(i => !i.comprado).length}</span></h2>
+      ${items.length ? `<div class="lista">${items.map(filaCompra).join('')}</div>` : '<div class="vacio">Nada que comprar aquí.</div>'}</section>`;
+  }
+  if (!cuerpo) cuerpo = '<div class="vacio grande">La lista está vacía. Añade lo que haga falta arriba.</div>';
+  const filtros = [['todas', 'Todas'], ...S.tiendas.map(t => [t.id, t.nombre]), ['sin', 'Sin tienda']];
+  return `<div class="cab-vista"><h1 class="titulo-vista">Lista de la compra</h1></div>
+    <section class="anadir">
+      <div class="fila-anadir">
+        <input type="text" id="c-nombre" placeholder="Añadir producto: leche, pan…" autocomplete="off" maxlength="60" value="${esc(S.compraTexto)}" aria-label="Producto">
+        <input type="text" id="c-cant" placeholder="Cantidad" maxlength="20" value="${esc(S.compraCant)}" aria-label="Cantidad (opcional)">
+        <select id="c-tienda" aria-label="Tienda">${opcionesTienda(S.compraTienda)}</select>
+        <button class="btn" data-anadir>Añadir</button>
+      </div>
+      <div class="sugs" id="sugerencias">${sugerenciasHTML(S.compraTexto)}</div>
+    </section>
+    <div class="controles">
+      <div class="tiendas-f" role="group" aria-label="Filtrar por tienda">${filtros.map(([k, n]) => `<button data-tienda-f="${k}" aria-pressed="${f === k}">${esc(n)}</button>`).join('')}</div>
+      <button class="btn sec peq" data-tiendas>Tiendas</button>
+      <button class="btn sec peq" data-quitar-comprados${comprados ? '' : ' disabled'}>Quitar comprados${comprados ? ` (${comprados})` : ''}</button>
+    </div>
+    <div class="compra-grupos">${cuerpo}</div>`;
+}
+
+async function anadirCompra(nombre, cantidad, tiendaId) {
+  nombre = String(nombre || '').trim();
+  if (!nombre) return;
+  const n = normal(nombre);
+  const pendiente = S.compra.find(i => !i.comprado && normal(i.nombre) === n);
+  if (pendiente) return avisar(`${pendiente.nombre} ya está en la lista`);
+  const ya = S.compra.find(i => i.comprado && normal(i.nombre) === n);
+  const datos = { nombre, cantidad: cantidad || '', tiendaId: tiendaId || null, comprado: false };
+  (ya ? FB.updateDoc(FB.doc(db, 'compra', ya.id), datos)
+      : FB.addDoc(FB.collection(db, 'compra'), { ...datos, creado: FB.serverTimestamp(), creadoPor: S.tablet ? 'tablet' : S.yo })).catch(alError);
+  FB.setDoc(FB.doc(db, 'productos', idProducto(nombre)), { nombre, tiendaId: tiendaId || null, veces: FB.increment(1), ultimo: hoy() }, { merge: true }).catch(alError);
+}
+function anadirDesdeBarra() {
+  const nombre = S.compraTexto.trim();
+  if (!nombre) { document.getElementById('c-nombre')?.focus(); return; }
+  const prod = S.productos.find(p => normal(p.nombre) === normal(nombre));
+  const tienda = S.compraTienda || (prod && prod.tiendaId) || '';
+  anadirCompra(nombre, S.compraCant.trim(), tienda);
+  S.compraTexto = ''; S.compraCant = '';
+  pintar();
+  document.getElementById('c-nombre')?.focus();
+}
+
+function quitarComprados() {
+  const xs = S.compra.filter(i => i.comprado);
+  if (!xs.length) return;
+  const lote = FB.writeBatch(db);
+  xs.forEach(i => lote.delete(FB.doc(db, 'compra', i.id)));
+  lote.commit().catch(alError);
+  const copia = xs.map(({ id, _ts, ...resto }) => [id, resto]);
+  avisar(`Quitados ${xs.length} productos comprados`, 'Deshacer', () => {
+    const l = FB.writeBatch(db);
+    copia.forEach(([id, d]) => l.set(FB.doc(db, 'compra', id), d));
+    l.commit().catch(alError);
+  });
+}
+
+function formularioItem(i) {
+  if (!i) return;
+  abrirHoja(`<h3>${esc(i.nombre)}</h3>
+    <div class="campo"><label for="i-nombre">Producto</label><input type="text" id="i-nombre" value="${esc(i.nombre)}" maxlength="60"></div>
+    <div class="campo"><label for="i-cant">Cantidad</label><input type="text" id="i-cant" value="${esc(i.cantidad || '')}" maxlength="20" placeholder="Opcional"></div>
+    <div class="campo"><label for="i-tienda">Tienda</label><select id="i-tienda">${opcionesTienda(tiendaDe(i) === 'sin' ? '' : i.tiendaId)}</select></div>
+    <div class="acciones"><button class="btn sec" data-cerrar>Cancelar</button><button class="btn" id="i-guardar">Guardar</button></div>
+    <button class="btn peligro ancho" id="i-borrar" style="margin-top:10px">Quitar de la lista</button>`);
+  $('#i-guardar').onclick = () => {
+    const nombre = $('#i-nombre').value.trim() || i.nombre;
+    const tiendaId = $('#i-tienda').value || null;
+    FB.updateDoc(FB.doc(db, 'compra', i.id), { nombre, cantidad: $('#i-cant').value.trim(), tiendaId }).catch(alError);
+    // la próxima vez que se sugiera, irá a esa tienda
+    FB.setDoc(FB.doc(db, 'productos', idProducto(nombre)), { nombre, tiendaId }, { merge: true }).catch(alError);
+    cerrarHoja();
+  };
+  $('#i-borrar').onclick = () => {
+    const { id, _ts, ...resto } = i;
+    FB.deleteDoc(FB.doc(db, 'compra', i.id)).catch(alError);
+    cerrarHoja();
+    avisar(`${i.nombre} quitado`, 'Deshacer', () => FB.setDoc(FB.doc(db, 'compra', id), resto).catch(alError));
+  };
+}
+
+function formularioTiendas() {
+  const fila = t => `<div class="fila-edit" data-id="${t ? t.id : ''}">
+      <input type="text" value="${esc(t ? t.nombre : '')}" maxlength="30" aria-label="Nombre de la tienda">
+      <button type="button" class="icono" data-sube aria-label="Subir">↑</button>
+      <button type="button" class="icono" data-baja aria-label="Bajar">↓</button>
+      <button type="button" class="icono" data-quita aria-label="Borrar tienda">✕</button></div>`;
+  abrirHoja(`<h3>Tiendas</h3><p class="sub">El orden es el de la lista. Si borras una tienda, sus productos pasan a "Sin tienda".</p>
+    <div id="t-lista">${S.tiendas.map(fila).join('')}</div>
+    <div class="fila-edit"><input type="text" id="t-nueva" placeholder="Nueva tienda (Mercadona, Lidl…)" maxlength="30"><button type="button" class="btn sec" id="t-anadir">Añadir</button></div>
+    <div class="acciones"><button class="btn sec" data-cerrar>Cancelar</button><button class="btn" id="t-guardar">Guardar</button></div>`);
+  const lista = $('#t-lista'), borradas = [];
+  lista.onclick = e => {
+    const b = e.target.closest('button'); if (!b) return;
+    const f = b.closest('.fila-edit');
+    if ('sube' in b.dataset && f.previousElementSibling) lista.insertBefore(f, f.previousElementSibling);
+    if ('baja' in b.dataset && f.nextElementSibling) lista.insertBefore(f.nextElementSibling, f);
+    if ('quita' in b.dataset) { if (f.dataset.id) borradas.push(f.dataset.id); f.remove(); }
+  };
+  $('#t-anadir').onclick = () => {
+    const n = $('#t-nueva').value.trim(); if (!n) return;
+    lista.insertAdjacentHTML('beforeend', fila(null));
+    lista.lastElementChild.querySelector('input').value = n;
+    $('#t-nueva').value = '';
+  };
+  $('#t-guardar').onclick = () => {
+    const pendiente = $('#t-nueva').value.trim();
+    if (pendiente) $('#t-anadir').click();
+    const lote = FB.writeBatch(db);
+    [...lista.children].forEach((f, orden) => {
+      const nombre = f.querySelector('input').value.trim();
+      if (!nombre) { if (f.dataset.id) lote.delete(FB.doc(db, 'tiendas', f.dataset.id)); return; }
+      const ref = f.dataset.id ? FB.doc(db, 'tiendas', f.dataset.id) : FB.doc(FB.collection(db, 'tiendas'));
+      lote.set(ref, { nombre, orden });
+    });
+    borradas.forEach(id => lote.delete(FB.doc(db, 'tiendas', id)));
+    lote.commit().catch(alError);
+    if (borradas.includes(S.compraF)) S.compraF = 'todas';
+    if (borradas.includes(S.compraTienda)) S.compraTienda = '';
+    cerrarHoja();
+    avisar('Tiendas guardadas');
+  };
+}
+
+function formularioHabituales() {
+  const xs = [...S.productos].sort((a, b) => (a.nombre || '').localeCompare(b.nombre || '', 'es'));
+  abrirHoja(`<h3>Productos habituales</h3><p class="sub">Se guardan solos al añadir cosas a la lista. Aquí puedes cambiar su tienda o quitarlos de las sugerencias.</p>
+    <div id="h-lista">${xs.map(p => `<div class="fila-edit" data-id="${esc(p.id)}"><span style="flex:1;font-weight:800;min-width:0;overflow-wrap:anywhere">${esc(p.nombre)}</span>
+      <select aria-label="Tienda de ${esc(p.nombre)}" style="flex:1">${opcionesTienda(p.tiendaId && S.tiendas.some(t => t.id === p.tiendaId) ? p.tiendaId : '')}</select>
+      <button type="button" class="icono" data-quita aria-label="Quitar ${esc(p.nombre)}">✕</button></div>`).join('') || '<div class="vacio">Aún no hay productos habituales.</div>'}</div>
+    <div class="acciones"><button class="btn sec" data-cerrar>Cancelar</button><button class="btn" id="h-guardar">Guardar</button></div>`);
+  const borrados = [];
+  $('#h-lista').onclick = e => { const b = e.target.closest('[data-quita]'); if (!b) return; const f = b.closest('.fila-edit'); borrados.push(f.dataset.id); f.remove(); };
+  $('#h-guardar').onclick = () => {
+    const lote = FB.writeBatch(db);
+    sheet.querySelectorAll('#h-lista .fila-edit').forEach(f => {
+      const p = S.productos.find(x => x.id === f.dataset.id);
+      const tiendaId = f.querySelector('select').value || null;
+      if (p && (p.tiendaId || null) !== tiendaId) lote.update(FB.doc(db, 'productos', p.id), { tiendaId });
+    });
+    borrados.forEach(id => lote.delete(FB.doc(db, 'productos', id)));
+    lote.commit().catch(alError);
+    cerrarHoja();
+    avisar('Habituales guardados');
+  };
+}
+
+/* =====================================================================
+   Películas y series
+   Colección pelis { titulo, tipo: peli|serie, descripcion, plataforma, categorias[], puntuacion 0-5,
+                     estado: pendiente|viendo|vista, episodios, progreso { episodio, minuto }, creado }
+   ajustes/pelis { plataformas[], categorias[] }
+   ===================================================================== */
+const ESTADOS_PELI = [['pendiente', 'Pendiente'], ['viendo', 'Viendo'], ['vista', 'Vista']];
+const nombreEstado = k => (ESTADOS_PELI.find(e => e[0] === k) || ESTADOS_PELI[0])[1];
+const estrellasTexto = n => n ? '★'.repeat(n) + `<span class="apagada">${'★'.repeat(5 - n)}</span>` : '';
+const listasPelis = () => {
+  const a = S.ajustesPelis || AJUSTES_PELIS_INICIALES;
+  const usadasP = S.pelis.map(p => p.plataforma).filter(Boolean);
+  const usadasC = S.pelis.flatMap(p => p.categorias || []);
+  const unico = xs => [...new Set(xs)].sort((x, y) => x.localeCompare(y, 'es'));
+  return { plataformas: unico([...(a.plataformas || []), ...usadasP]), categorias: unico([...(a.categorias || []), ...usadasC]) };
+};
+function progresoTexto(p) {
+  const pr = p.progreso || {};
+  const ep = parseInt(pr.episodio, 10) || 0, min = parseInt(pr.minuto, 10) || 0;
+  if (p.tipo === 'serie') {
+    if (!ep && !min) return p.episodios ? `${p.episodios} episodios` : '';
+    return `Vamos por el episodio ${ep || 1}${p.episodios ? ` de ${p.episodios}` : ''}${min ? `, minuto ${min}` : ''}`;
+  }
+  return min ? `Vamos por el minuto ${min}` : '';
+}
+
+function filtrarPelis(F, { sinVistas = false } = {}) {
+  const q = normal(F.texto);
+  let xs = S.pelis.filter(p => {
+    if (sinVistas && p.estado === 'vista') return false;
+    if (!sinVistas) {
+      if (F.estado === 'porver' && p.estado === 'vista') return false;
+      if (F.estado === 'viendo' && p.estado !== 'viendo') return false;
+      if (F.estado === 'vista' && p.estado !== 'vista') return false;
+    }
+    if (F.tipo !== 'todo' && (p.tipo || 'peli') !== F.tipo) return false;
+    if (F.plataforma !== 'todas' && p.plataforma !== F.plataforma) return false;
+    if (F.categoria !== 'todas' && !(p.categorias || []).includes(F.categoria)) return false;
+    if (F.puntos === 'sin' && (p.puntuacion || 0) > 0) return false;
+    if (/^\d$/.test(F.puntos) && (p.puntuacion || 0) < +F.puntos) return false;
+    if (q && !normal(`${p.titulo} ${p.descripcion || ''}`).includes(q)) return false;
+    return true;
+  });
+  const orden = {
+    recientes: (a, b) => b._ts - a._ts,
+    titulo: (a, b) => a.titulo.localeCompare(b.titulo, 'es'),
+    puntuacion: (a, b) => (b.puntuacion || 0) - (a.puntuacion || 0) || a.titulo.localeCompare(b.titulo, 'es')
+  }[F.orden] || ((a, b) => b._ts - a._ts);
+  return xs.sort(orden);
+}
+
+function tarjetaPeli(p) {
+  const prog = progresoTexto(p);
+  return `<div class="peli${p.estado === 'vista' ? ' vista' : ''}" data-peli="${p.id}" role="button" tabindex="0">
+    <div class="pills"><span class="pill">${p.tipo === 'serie' ? 'Serie' : 'Película'}</span>${p.plataforma ? `<span class="pill plat">${esc(p.plataforma)}</span>` : ''}${p.estado === 'viendo' ? '<span class="pill viendo">Viendo</span>' : ''}${p.estado === 'vista' ? '<span class="pill vista">Vista</span>' : ''}</div>
+    <div class="peli-tit">${esc(p.titulo)}</div>
+    ${p.puntuacion ? `<div class="estrellas" aria-label="${p.puntuacion} de 5">${estrellasTexto(p.puntuacion)}</div>` : ''}
+    ${(p.categorias || []).length ? `<div class="pills">${p.categorias.map(c => `<span class="pill cat">${esc(c)}</span>`).join('')}</div>` : ''}
+    ${prog ? `<div class="progreso">${prog}</div>` : ''}
+    ${p.descripcion ? `<div class="desc">${esc(p.descripcion)}</div>` : ''}
+  </div>`;
+}
+function listaPelisHTML() {
+  const xs = filtrarPelis(S.pelisF);
+  if (!S.pelis.length) return '<div class="vacio grande">Aún no hay películas ni series. Añade la primera con el botón amarillo.</div>';
+  if (!xs.length) return '<div class="vacio">Nada con estos filtros.</div>';
+  return `<p class="nota" style="margin:0 0 8px">${xs.length} ${xs.length === 1 ? 'título' : 'títulos'}</p><div class="pelis-grid">${xs.map(tarjetaPeli).join('')}</div>`;
+}
+
+function vistaPelis() {
+  const F = S.pelisF, L = listasPelis();
+  const sel = (k, opciones) => `<select data-pfsel="${k}" aria-label="${k}">${opciones.map(([v, n]) => `<option value="${esc(v)}"${F[k] === v ? ' selected' : ''}>${esc(n)}</option>`).join('')}</select>`;
+  return `<div class="cab-vista"><h1 class="titulo-vista">Películas y series</h1>
+      <div class="botones"><button class="btn" data-ruleta style="background:var(--sol);color:#17303A">🎲 Ruleta</button>
+      <button class="btn sec" data-ajustes-pelis>Listas</button></div></div>
+    <div class="filtros-pelis">
+      <input type="text" id="p-buscar" placeholder="Buscar…" value="${esc(F.texto)}" autocomplete="off" aria-label="Buscar">
+      ${sel('tipo', [['todo', 'Pelis y series'], ['peli', 'Solo películas'], ['serie', 'Solo series']])}
+      ${sel('plataforma', [['todas', 'Todas las plataformas'], ...L.plataformas.map(x => [x, x])])}
+      ${sel('categoria', [['todas', 'Todas las categorías'], ...L.categorias.map(x => [x, x])])}
+      ${sel('puntos', [['todas', 'Cualquier puntuación'], ['5', '★★★★★'], ['4', '★★★★ o más'], ['3', '★★★ o más'], ['2', '★★ o más'], ['1', '★ o más'], ['sin', 'Sin puntuar']])}
+      ${sel('orden', [['recientes', 'Más recientes'], ['titulo', 'Por título'], ['puntuacion', 'Mejor puntuadas']])}
+      <div class="seg" role="group" aria-label="Estado">${[['porver', 'Por ver'], ['viendo', 'Viendo'], ['vista', 'Vistas'], ['todas', 'Todas']].map(([k, n]) => `<button data-pfestado="${k}" aria-pressed="${F.estado === k}">${n}</button>`).join('')}</div>
+    </div>
+    <div id="pelis-lista">${listaPelisHTML()}</div>`;
+}
+
+function fichaPeli(p) {
+  if (!p) return;
+  const pr = p.progreso || {};
+  let ep = parseInt(pr.episodio, 10) || 0;
+  const serie = p.tipo === 'serie';
+  const guardar = (cambios, texto) => {
+    FB.updateDoc(FB.doc(db, 'pelis', p.id), cambios).catch(alError);
+    if (texto) avisar(texto);
+    fichaPeli({ ...p, ...cambios });
+  };
+  abrirHoja(`<h3>${esc(p.titulo)}</h3>
+    <div class="pills" style="margin-bottom:10px"><span class="pill">${serie ? 'Serie' : 'Película'}</span>${p.plataforma ? `<span class="pill plat">${esc(p.plataforma)}</span>` : ''}${(p.categorias || []).map(c => `<span class="pill cat">${esc(c)}</span>`).join('')}</div>
+    ${p.descripcion ? `<p style="white-space:pre-wrap;margin:0 0 12px">${esc(p.descripcion)}</p>` : ''}
+    <div class="campo"><span class="lbl">Puntuación</span><div class="estrellas-btn" id="pf-estrellas">${[1, 2, 3, 4, 5].map(n => `<button type="button" data-n="${n}" class="${n <= (p.puntuacion || 0) ? 'on' : ''}" aria-label="${n} estrellas">★</button>`).join('')}</div></div>
+    <div class="campo"><span class="lbl">Estado</span><div class="seg" id="pf-estado">${ESTADOS_PELI.map(([k, n]) => `<button type="button" data-r="${k}" aria-pressed="${(p.estado || 'pendiente') === k}">${n}</button>`).join('')}</div></div>
+    <div class="campo" style="background:var(--superficie);border:1px solid var(--linea);border-radius:var(--radio);padding:12px">
+      <span class="lbl">Dónde nos hemos quedado</span>
+      ${serie ? `<div class="fila2" style="margin-bottom:8px"><span style="font-weight:700">Episodio</span>
+        <div class="contador" style="flex:none"><button type="button" class="icono" id="pf-menos" aria-label="Episodio anterior">−</button><span class="num" id="pf-ep">${ep || 1}</span><button type="button" class="icono" id="pf-mas" aria-label="Episodio siguiente">+</button></div>
+        <span class="nota" style="flex:none">${p.episodios ? `de ${p.episodios}` : ''}</span></div>` : ''}
+      <div class="fila2"><label for="pf-min" style="font-weight:700;flex:none;margin:0">Minuto</label><input type="number" id="pf-min" min="0" max="999" value="${esc(pr.minuto || '')}" placeholder="0"></div>
+      <button class="btn ok ancho" id="pf-guardar" style="margin-top:10px">Guardar dónde nos quedamos</button>
+    </div>
+    <div class="acciones"><button class="btn sec" data-cerrar>Cerrar</button><button class="btn" id="pf-editar">Editar</button></div>
+    <button class="btn peligro ancho" id="pf-borrar" style="margin-top:10px">Borrar</button>`);
+  if (!ep) ep = 1;
+  $('#pf-estrellas').onclick = e => {
+    const b = e.target.closest('[data-n]'); if (!b) return;
+    const n = +b.dataset.n;
+    guardar({ puntuacion: n === p.puntuacion ? 0 : n });
+  };
+  activarSeg('pf-estado', r => guardar({ estado: r }, `Marcada como ${nombreEstado(r).toLowerCase()}`));
+  if (serie) {
+    const max = parseInt(p.episodios, 10) || 9999;
+    $('#pf-menos').onclick = () => { ep = Math.max(1, ep - 1); $('#pf-ep').textContent = ep; };
+    $('#pf-mas').onclick = () => { ep = Math.min(max, ep + 1); $('#pf-ep').textContent = ep; $('#pf-min').value = ''; };
+  }
+  $('#pf-guardar').onclick = () => {
+    const progreso = { episodio: serie ? ep : null, minuto: parseInt($('#pf-min').value, 10) || 0 };
+    const cambios = { progreso };
+    if ((p.estado || 'pendiente') === 'pendiente') cambios.estado = 'viendo';
+    guardar(cambios, 'Guardado dónde os quedasteis');
+  };
+  $('#pf-editar').onclick = () => formularioPeli(p);
+  $('#pf-borrar').onclick = () => {
+    if (!confirm(`¿Borrar "${p.titulo}"?`)) return;
+    FB.deleteDoc(FB.doc(db, 'pelis', p.id)).catch(alError);
+    cerrarHoja();
+    avisar('Borrada');
+  };
+}
+
+function formularioPeli(p) {
+  const nueva = !p;
+  const v = p || { titulo: '', tipo: 'peli', descripcion: '', plataforma: '', categorias: [], puntuacion: 0, estado: 'pendiente', episodios: null };
+  const L = listasPelis();
+  let tipo = v.tipo || 'peli', plataforma = v.plataforma || '', cats = [...(v.categorias || [])], puntos = v.puntuacion || 0, estado = v.estado || 'pendiente';
+  const todasCats = [...new Set([...L.categorias, ...cats])];
+  const chipsPlat = () => L.plataformas.map(x => `<button type="button" class="sug" data-plat="${esc(x)}" aria-pressed="${plataforma === x}" style="${plataforma === x ? 'background:var(--tinta);color:var(--papel)' : ''}">${esc(x)}</button>`).join('');
+  const chipsCat = () => todasCats.map(x => `<button type="button" class="sug" data-cat="${esc(x)}" style="${cats.includes(x) ? 'background:var(--tinta);color:var(--papel)' : ''}">${esc(x)}</button>`).join('');
+  abrirHoja(`<h3>${nueva ? 'Añadir película o serie' : 'Editar'}</h3>
+    <div class="campo"><div class="seg" id="pe-tipo"><button type="button" data-r="peli" aria-pressed="${tipo === 'peli'}">Película</button><button type="button" data-r="serie" aria-pressed="${tipo === 'serie'}">Serie</button></div></div>
+    <div class="campo"><label for="pe-titulo">Título</label><input type="text" id="pe-titulo" value="${esc(v.titulo)}" maxlength="100"></div>
+    <div class="campo"><label for="pe-desc">Descripción</label><textarea id="pe-desc" maxlength="600" placeholder="De qué va, quién la recomendó…">${esc(v.descripcion || '')}</textarea></div>
+    <div class="campo"><span class="lbl">Plataforma</span><div class="sugs" id="pe-plat" style="margin:0">${chipsPlat()}</div>
+      <input type="text" id="pe-plat-otra" placeholder="Otra plataforma" maxlength="30" style="margin-top:8px" value="${plataforma && !L.plataformas.includes(plataforma) ? esc(plataforma) : ''}"></div>
+    <div class="campo"><span class="lbl">Categorías</span><div class="sugs" id="pe-cats" style="margin:0">${chipsCat()}</div>
+      <div class="fila2" style="margin-top:8px"><input type="text" id="pe-cat-nueva" placeholder="Nueva categoría" maxlength="30"><button type="button" class="btn sec" id="pe-cat-anadir" style="flex:none">Añadir</button></div></div>
+    <div class="campo${tipo === 'serie' ? '' : ' hidden'}" id="pe-eps-c"><label for="pe-eps">Número de episodios</label><input type="number" id="pe-eps" min="1" max="9999" value="${esc(v.episodios || '')}" placeholder="Opcional"></div>
+    <div class="campo"><span class="lbl">Estado</span><div class="seg" id="pe-estado">${ESTADOS_PELI.map(([k, n]) => `<button type="button" data-r="${k}" aria-pressed="${estado === k}">${n}</button>`).join('')}</div></div>
+    <div class="campo"><span class="lbl">Puntuación</span><div class="estrellas-btn" id="pe-estrellas">${[1, 2, 3, 4, 5].map(n => `<button type="button" data-n="${n}" class="${n <= puntos ? 'on' : ''}" aria-label="${n} estrellas">★</button>`).join('')}</div></div>
+    <div class="acciones"><button class="btn sec" data-cerrar>Cancelar</button><button class="btn" id="pe-guardar">Guardar</button></div>`);
+  activarSeg('pe-tipo', r => { tipo = r; $('#pe-eps-c').classList.toggle('hidden', tipo !== 'serie'); });
+  activarSeg('pe-estado', r => { estado = r; });
+  $('#pe-plat').onclick = e => {
+    const b = e.target.closest('[data-plat]'); if (!b) return;
+    plataforma = plataforma === b.dataset.plat ? '' : b.dataset.plat;
+    $('#pe-plat-otra').value = '';
+    $('#pe-plat').innerHTML = chipsPlat();
+  };
+  $('#pe-plat-otra').oninput = () => { if ($('#pe-plat-otra').value.trim()) { plataforma = ''; $('#pe-plat').innerHTML = chipsPlat(); } };
+  $('#pe-cats').onclick = e => {
+    const b = e.target.closest('[data-cat]'); if (!b) return;
+    const c = b.dataset.cat;
+    cats = cats.includes(c) ? cats.filter(x => x !== c) : [...cats, c];
+    $('#pe-cats').innerHTML = chipsCat();
+  };
+  $('#pe-cat-anadir').onclick = () => {
+    const c = $('#pe-cat-nueva').value.trim(); if (!c) return;
+    const existente = todasCats.find(x => normal(x) === normal(c)) || c;
+    if (!todasCats.includes(existente)) todasCats.push(existente);
+    if (!cats.includes(existente)) cats.push(existente);
+    $('#pe-cat-nueva').value = '';
+    $('#pe-cats').innerHTML = chipsCat();
+  };
+  $('#pe-estrellas').onclick = e => {
+    const b = e.target.closest('[data-n]'); if (!b) return;
+    puntos = +b.dataset.n === puntos ? 0 : +b.dataset.n;
+    sheet.querySelectorAll('#pe-estrellas button').forEach(x => x.classList.toggle('on', +x.dataset.n <= puntos));
+  };
+  $('#pe-guardar').onclick = () => {
+    const titulo = $('#pe-titulo').value.trim();
+    if (!titulo) { $('#pe-titulo').focus(); return avisar('Escribe el título'); }
+    if ($('#pe-cat-nueva').value.trim()) $('#pe-cat-anadir').click();
+    const otra = $('#pe-plat-otra').value.trim();
+    const plat = otra || plataforma;
+    const datos = {
+      titulo, tipo, descripcion: $('#pe-desc').value.trim(), plataforma: plat, categorias: cats,
+      puntuacion: puntos, estado, episodios: tipo === 'serie' ? (parseInt($('#pe-eps').value, 10) || null) : null
+    };
+    const op = nueva
+      ? FB.addDoc(FB.collection(db, 'pelis'), { ...datos, progreso: { episodio: null, minuto: 0 }, creado: FB.serverTimestamp(), creadoPor: S.tablet ? 'tablet' : S.yo })
+      : FB.updateDoc(FB.doc(db, 'pelis', p.id), datos);
+    op.catch(alError);
+    // las plataformas y categorías nuevas quedan guardadas para la próxima vez
+    const a = S.ajustesPelis || AJUSTES_PELIS_INICIALES;
+    const nuevasP = plat && !(a.plataformas || []).includes(plat) ? [...(a.plataformas || []), plat] : null;
+    const nuevasC = cats.filter(c => !(a.categorias || []).includes(c));
+    if (nuevasP || nuevasC.length) FB.setDoc(FB.doc(db, 'ajustes', 'pelis'), {
+      plataformas: nuevasP || a.plataformas || [], categorias: [...(a.categorias || []), ...nuevasC]
+    }, { merge: true }).catch(alError);
+    cerrarHoja();
+    avisar(nueva ? `${titulo} añadida` : 'Cambios guardados');
+  };
+  if (nueva) setTimeout(() => $('#pe-titulo')?.focus(), 50);
+}
+
+function formularioListasPelis() {
+  const a = S.ajustesPelis || AJUSTES_PELIS_INICIALES;
+  const bloque = (id, titulo, xs) => `<div class="campo"><span class="lbl">${titulo}</span><div id="${id}">${xs.map(x => `<div class="fila-edit"><input type="text" value="${esc(x)}" maxlength="30"><button type="button" class="icono" data-quita aria-label="Quitar">✕</button></div>`).join('')}</div>
+    <button type="button" class="btn sec peq" data-anade="${id}">+ Añadir</button></div>`;
+  abrirHoja(`<h3>Plataformas y categorías</h3><p class="sub">Quitar una de aquí no la borra de las películas que ya la tienen.</p>
+    ${bloque('la-plat', 'Plataformas', a.plataformas || [])}${bloque('la-cats', 'Categorías', a.categorias || [])}
+    <div class="acciones"><button class="btn sec" data-cerrar>Cancelar</button><button class="btn" id="la-guardar">Guardar</button></div>`);
+  sheet.querySelector('.panel').addEventListener('click', e => {
+    const q = e.target.closest('[data-quita]'); if (q) return q.closest('.fila-edit').remove();
+    const an = e.target.closest('[data-anade]');
+    if (an) { $('#' + an.dataset.anade).insertAdjacentHTML('beforeend', '<div class="fila-edit"><input type="text" maxlength="30"><button type="button" class="icono" data-quita aria-label="Quitar">✕</button></div>'); $('#' + an.dataset.anade).lastElementChild.querySelector('input').focus(); }
+  });
+  const leer = id => [...new Set([...sheet.querySelectorAll(`#${id} input`)].map(i => i.value.trim()).filter(Boolean))];
+  $('#la-guardar').onclick = () => {
+    FB.setDoc(FB.doc(db, 'ajustes', 'pelis'), { plataformas: leer('la-plat'), categorias: leer('la-cats') }).catch(alError);
+    cerrarHoja();
+    avisar('Listas guardadas');
+  };
+}
+
+/* ---- Ruleta para cuando no sabemos qué ver ---- */
+let giroRueda = 0;
+function hojaRuleta() {
+  const F = { ...S.pelisF, texto: '' };
+  let tipo = F.tipo;
+  const candidatos = () => filtrarPelis({ ...F, tipo }, { sinVistas: true });
+  const dibujar = () => {
+    let xs = candidatos();
+    const total = xs.length;
+    if (xs.length > 24) xs = [...xs].sort(() => Math.random() - 0.5).slice(0, 24);
+    const filtrosTxt = [F.plataforma !== 'todas' && F.plataforma, F.categoria !== 'todas' && F.categoria, /^\d$/.test(F.puntos) && `${F.puntos}★ o más`].filter(Boolean).join(', ');
+    abrirHoja(`<h3>🎲 ¿Qué vemos?</h3>
+      <p class="sub">Entre ${total} ${total === 1 ? 'título' : 'títulos'} sin ver${filtrosTxt ? ` (${esc(filtrosTxt)})` : ''}${total > 24 ? '. En la rueda salen 24 al azar' : ''}.</p>
+      <div class="seg" id="ru-tipo" style="margin-bottom:12px">${[['todo', 'Todo'], ['peli', 'Películas'], ['serie', 'Series']].map(([k, n]) => `<button type="button" data-r="${k}" aria-pressed="${tipo === k}">${n}</button>`).join('')}</div>
+      ${xs.length >= 2 ? `<div class="rueda"><div class="puntero"></div>${ruedaSVG(xs)}</div>
+        <p class="resultado" id="ru-res" aria-live="polite"></p>
+        <button class="btn ancho" id="ru-girar" style="background:var(--sol);color:#17303A;font-size:1.1rem">Girar</button>
+        <button class="btn sec ancho hidden" id="ru-ver" style="margin-top:8px">Ver ficha</button>`
+      : `<div class="vacio">${xs.length === 1 ? `Solo hay una opción: <b>${esc(xs[0].titulo)}</b>.` : 'No hay títulos sin ver con estos filtros.'} Prueba a cambiar los filtros de la pestaña.</div>`}
+      <button class="btn sec ancho" data-cerrar style="margin-top:8px">Cerrar</button>`);
+    activarSeg('ru-tipo', r => { tipo = r; giroRueda = 0; dibujar(); });
+    if (xs.length < 2) return;
+    giroRueda = 0;
+    let elegida = null;
+    $('#ru-girar').onclick = () => {
+      const n = xs.length, seg = 360 / n, i = Math.floor(Math.random() * n);
+      const objetivo = 360 - (i * seg + seg / 2) + (Math.random() - 0.5) * seg * 0.6;
+      giroRueda = giroRueda - (giroRueda % 360) + 360 * 6 + objetivo;
+      const g = $('#rueda-g'), lento = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      g.style.transition = lento ? 'transform 4.2s cubic-bezier(.17,.67,.16,1)' : 'none';
+      g.style.transform = `rotate(${giroRueda}deg)`;
+      $('#ru-res').textContent = '';
+      $('#ru-girar').disabled = true;
+      $('#ru-ver').classList.add('hidden');
+      setTimeout(() => {
+        if (!$('#ru-res')) return;
+        elegida = xs[i];
+        $('#ru-res').textContent = `¡${elegida.titulo}!`;
+        $('#ru-girar').disabled = false;
+        $('#ru-girar').textContent = 'Girar otra vez';
+        $('#ru-ver').classList.remove('hidden');
+      }, lento ? 4300 : 50);
+    };
+    $('#ru-ver').onclick = () => elegida && fichaPeli(elegida);
+  };
+  dibujar();
+}
+function ruedaSVG(items) {
+  const n = items.length, R = 150, c = 160;
+  const colores = ['#A8D5BA', '#F6C89F', '#A7D3E8', '#C9B6E4', '#F4A9A8', '#F9E3A3'];
+  let s = '';
+  items.forEach((p, i) => {
+    const a0 = (i / n) * 2 * Math.PI - Math.PI / 2, a1 = ((i + 1) / n) * 2 * Math.PI - Math.PI / 2;
+    const p0 = [c + R * Math.cos(a0), c + R * Math.sin(a0)], p1 = [c + R * Math.cos(a1), c + R * Math.sin(a1)];
+    let color = colores[i % colores.length];
+    if (i === n - 1 && i % colores.length === 0) color = colores[2]; // que no coincida con el primero
+    s += `<path d="M${c} ${c} L${p0[0].toFixed(2)} ${p0[1].toFixed(2)} A${R} ${R} 0 ${a1 - a0 > Math.PI ? 1 : 0} 1 ${p1[0].toFixed(2)} ${p1[1].toFixed(2)} Z" fill="${color}" stroke="#fff" stroke-width="2"/>`;
+    const ang = ((i + 0.5) / n) * 360 - 90;
+    const t = p.titulo.length > 17 ? p.titulo.slice(0, 16) + '…' : p.titulo;
+    s += `<text transform="rotate(${ang.toFixed(2)} ${c} ${c}) translate(${c + R - 12} ${c})" text-anchor="end" dominant-baseline="middle" font-size="${n > 16 ? 10 : n > 10 ? 11 : 13}" font-weight="800" fill="#17303A" font-family="Nunito, system-ui, sans-serif">${esc(t)}</text>`;
+  });
+  return `<svg viewBox="0 0 320 320" class="rueda-svg" role="img" aria-label="Ruleta"><g id="rueda-g" style="transform-origin:160px 160px;transform-box:view-box">${s}<circle cx="${c}" cy="${c}" r="20" fill="#17303A"/><circle cx="${c}" cy="${c}" r="${R}" fill="none" stroke="#17303A" stroke-width="3"/></g></svg>`;
+}
 
 /* ---------- Pintado general ---------- */
 const PESTANAS = [['tablon', 'Tablón', I.cal], ['pelis', 'Películas y series', I.peli], ['compra', 'Compra', I.carro]];
 function pintar() {
   if (!S.usuario || !S.yo) return;
-  const vistas = {
-    tablon: vistaTablon,
-    pelis: () => vistaProximamente('Películas y series'),
-    compra: () => vistaProximamente('La lista de la compra')
-  };
+  const vistas = { tablon: vistaTablon, pelis: vistaPelis, compra: vistaCompra };
   const scroll = window.scrollY;
+  // conservar el foco y el cursor del campo en el que se está escribiendo
+  const act = document.activeElement;
+  const foco = act && app.contains(act) && act.id && 'value' in act
+    ? { id: act.id, ini: act.selectionStart, fin: act.selectionEnd } : null;
   const quien = S.tablet ? 'Tablet' : PERSONAS[S.yo].nombre;
+  const fab = { tablon: ['data-nueva', 'Añadir tarea o evento'], pelis: ['data-nueva-peli', 'Añadir película o serie'] }[S.vista];
   app.innerHTML = `<header class="top"><div class="marca">${I.tejado}HomePlan<span class="ver">v${VERSION_APP}</span></div>
       <button class="yo" data-cuenta>${quien}</button></header>
     <main>${vistas[S.vista]()}</main>
-    ${S.vista === 'tablon' ? `<button class="fab" data-nueva aria-label="Añadir tarea o evento">${I.mas}</button>` : ''}
+    ${fab ? `<button class="fab" ${fab[0]} aria-label="${fab[1]}">${I.mas}</button>` : ''}
     <nav class="tabs"><div class="in">${PESTANAS.map(([k, n, ic]) =>
       `<button data-vista="${k}"${S.vista === k ? ' aria-current="page"' : ''}>${ic}<span>${n}</span></button>`).join('')}</div></nav>`;
+  if (foco) {
+    const el = document.getElementById(foco.id);
+    if (el) { el.focus({ preventScroll: true }); try { el.setSelectionRange(foco.ini, foco.fin); } catch (e) { /* no aplica */ } }
+  }
   if (S.irA && S.vista === 'tablon') {
     const destino = document.getElementById('d-' + S.irA);
     S.irA = null;
@@ -720,7 +1302,23 @@ function pintar() {
 }
 
 /* ---------- Eventos de la interfaz ---------- */
-const ACCIONES = '[data-cerrar],[data-completar],[data-occ],[data-registro],[data-editar],[data-vista],[data-modo],[data-persona],[data-mover],[data-irhoy],[data-dia],[data-nueva],[data-nuevo-dia],[data-cuenta],[data-todo]';
+const ACCIONES = '[data-cerrar],[data-completar],[data-occ],[data-registro],[data-editar],[data-vista],[data-modo],[data-persona],[data-mover],[data-irhoy],[data-dia],[data-nueva],[data-nuevo-dia],[data-cuenta],[data-todo],' +
+  '[data-anadir],[data-sug],[data-habituales],[data-comprar],[data-item],[data-tienda-f],[data-tiendas],[data-quitar-comprados],' +
+  '[data-peli],[data-nueva-peli],[data-ruleta],[data-ajustes-pelis],[data-pfestado]';
+app.addEventListener('input', e => {
+  const id = e.target.id;
+  if (id === 'c-nombre') { S.compraTexto = e.target.value; document.getElementById('sugerencias').innerHTML = sugerenciasHTML(S.compraTexto); }
+  else if (id === 'c-cant') S.compraCant = e.target.value;
+  else if (id === 'p-buscar') { S.pelisF.texto = e.target.value; document.getElementById('pelis-lista').innerHTML = listaPelisHTML(); }
+});
+app.addEventListener('change', e => {
+  if (e.target.id === 'c-tienda') S.compraTienda = e.target.value;
+  else if (e.target.dataset.pfsel) { S.pelisF[e.target.dataset.pfsel] = e.target.value; pintar(); }
+});
+app.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && (e.target.id === 'c-nombre' || e.target.id === 'c-cant')) { e.preventDefault(); anadirDesdeBarra(); }
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.dataset && e.target.dataset.peli) { e.preventDefault(); fichaPeli(S.pelis.find(p => p.id === e.target.dataset.peli)); }
+});
 document.addEventListener('click', e => {
   ultimaInteraccion = Date.now();
   if (e.target === sheet) return cerrarHoja();
@@ -741,6 +1339,21 @@ document.addEventListener('click', e => {
   if (d.nuevoDia) return formularioElemento(null, d.nuevoDia);
   if ('cuenta' in d) return menuCuenta();
   if ('todo' in d) return hojaTodo();
+  // compra
+  if ('anadir' in d) return anadirDesdeBarra();
+  if (d.sug) { const pr = S.productos.find(x => x.id === d.sug); if (pr) { anadirCompra(pr.nombre, '', pr.tiendaId || S.compraTienda || ''); S.compraTexto = ''; pintar(); } return; }
+  if ('habituales' in d) return formularioHabituales();
+  if (d.comprar) { const i = S.compra.find(x => x.id === d.comprar); if (i) FB.updateDoc(FB.doc(db, 'compra', i.id), { comprado: !i.comprado }).catch(alError); return; }
+  if (d.item) return formularioItem(S.compra.find(x => x.id === d.item));
+  if (d.tiendaF) { S.compraF = d.tiendaF; if (d.tiendaF !== 'todas') S.compraTienda = d.tiendaF === 'sin' ? '' : d.tiendaF; return pintar(); }
+  if ('tiendas' in d) return formularioTiendas();
+  if ('quitarComprados' in d) return quitarComprados();
+  // películas y series
+  if (d.peli) return fichaPeli(S.pelis.find(x => x.id === d.peli));
+  if ('nuevaPeli' in d) return formularioPeli(null);
+  if ('ruleta' in d) return hojaRuleta();
+  if ('ajustesPelis' in d) return formularioListasPelis();
+  if (d.pfestado) { S.pelisF.estado = d.pfestado; return pintar(); }
   if (d.mover) {
     const n = parseInt(d.mover, 10), c = S.cal;
     c.fecha = c.modo === 'semana' ? sumarDias(c.fecha, 7 * n) : sumarMeses(c.fecha, n);
