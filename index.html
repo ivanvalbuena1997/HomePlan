@@ -276,12 +276,13 @@ textarea{min-height:70px;resize:vertical}
 /* Semana de 7 días con dos carriles: tarjetas compactas (check pequeño con el texto alrededor, sin icono) */
 .rj.siete .tarjeta{display:block;padding:3px 4px 3px 5px}
 .rj.siete .ev-ico{display:none}
-.rj.siete .check{float:left;width:17px;height:17px;border-width:2px;margin:1px 4px 0 0}
+.rj.siete .check{float:left;width:17px;height:17px;border-width:2px;margin:1px 4px 0 0;z-index:2}
+.rj.siete .rj-sin .check{position:relative}
 .rj.siete .check svg{width:11px;height:11px}
 .rj.siete .nombre{font-size:.78rem;line-height:1.15;overflow-wrap:break-word;hyphens:auto}
 .rj.siete .meta{font-size:.66rem;gap:0 5px;clear:left}
-.rj.siete .bloque.corto .meta{display:none}
-.rj.siete .bloque.corto .nombre{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rj.siete .bloque.corto .meta,.rj.siete .fila-pila.corto .meta{display:none}
+.rj.siete .bloque.corto .nombre,.rj.siete .fila-pila.corto .nombre{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rj.siete .rj-sin>div{max-height:132px}
 .rj-dia{position:relative;border:1px solid var(--linea);border-radius:10px;background:repeating-linear-gradient(to bottom,var(--linea) 0,var(--linea) 1px,transparent 1px,transparent var(--hh)),var(--superficie)}
 .rj-dia.es-hoy{border:2px solid var(--sol)}
@@ -295,9 +296,19 @@ textarea{min-height:70px;resize:vertical}
 .bloque.estrecho .ev-ico{display:none}
 .bloque.estrecho .tarjeta{padding:3px 4px}
 .bloque .meta{font-size:.68rem;gap:0 6px}
-.bloque.corto .tarjeta{align-items:center}
-.bloque.corto .meta{display:none}
-.bloque.corto .nombre{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bloque.corto .tarjeta,.fila-pila.corto .tarjeta{align-items:center}
+.bloque.corto .meta,.fila-pila.corto .meta{display:none}
+.bloque.corto .nombre,.fila-pila.corto .nombre{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bloque.grupo{pointer-events:none}
+.fila-pila{position:absolute;left:0;right:0;pointer-events:auto}
+.fila-pila .tarjeta{height:100%;padding-top:1px;padding-bottom:1px}
+.rj.siete .fila-pila .check{margin-top:0}
+.rj.siete .hp{display:none}
+.fila-pila .tarjeta{gap:6px}
+.fila-pila .check,.fila-pila .ev-ico{width:16px;height:16px;border-width:2px}
+.fila-pila .check svg{width:10px;height:10px}
+.fila-pila .ev-ico svg{width:13px;height:13px}
+.hp{font-weight:900;font-size:.85em;margin-right:4px;color:var(--pc);filter:brightness(.8)}
 .ahora{position:absolute;left:-2px;right:-2px;height:2px;background:var(--alerta);z-index:3;pointer-events:none}
 .ahora::before{content:"";position:absolute;left:-4px;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--alerta)}
 
@@ -388,7 +399,7 @@ const firebaseConfig = {
   measurementId: "G-G3KRG9DN75"
 };
 
-const VERSION_APP = '1.8';
+const VERSION_APP = '1.8.1';
 const PERSONAS = { ivan: { nombre: 'Iván' }, jen: { nombre: 'Jen' } };
 const CLAVE_TABLET = 'homeplan-tablet';
 const MINUTOS_VOLVER_A_HOY = 5;
@@ -790,7 +801,7 @@ function tarjetaOcc(it) {
   const hora = horaTexto(d);
   return `<div class="tarjeta p-${q}${it.atrasada ? ' atrasada' : ''}${pasado ? ' pasado' : ''}">${izq}
     <div class="info" data-occ="${t.id}" data-orig="${o.orig}">
-      <div class="nombre">${esc(d.nombre)}</div>
+      <div class="nombre">${it.prefijo ? `<span class="hp">${it.prefijo}</span>` : ''}${esc(d.nombre)}</div>
       <div class="meta">${hora ? `<span class="hora">${hora}</span>` : ''}${etiquetaQuien(d)}${repite(t) ? '<span title="Se repite">↻</span>' : ''}${it.atrasada ? `<span class="rojo">Tocaba ${fechaRelativa(o.fecha)}</span>` : ''}${it.solapa ? '<span class="rojo">Se solapa</span>' : ''}</div>
     </div></div>`;
 }
@@ -798,7 +809,7 @@ function tarjetaReg(r, it = {}) {
   const hora = horaTexto(r);
   return `<div class="tarjeta hecha p-${r.hechaPor in PERSONAS || r.hechaPor === 'ambos' ? r.hechaPor : 'ambos'}">
     <span class="check lleno" aria-hidden="true">${I.ok}</span>
-    <div class="info" data-registro="${r.id}"><div class="nombre">${esc(r.nombre)}</div>
+    <div class="info" data-registro="${r.id}"><div class="nombre">${it.prefijo ? `<span class="hp">${it.prefijo}</span>` : ''}${esc(r.nombre)}</div>
     <div class="meta">${hora ? `<span class="hora">${hora}</span>` : ''}<span>Hecha por ${nombreQuien(r.hechaPor)}</span>${r.prevista && r.prevista < r.fecha ? `<span>tocaba ${fechaCorta(r.prevista)}</span>` : ''}${it.solapa ? '<span class="rojo">Se solapa</span>' : ''}</div></div></div>`;
 }
 const tarjeta = it => it.tipo === 'reg' ? tarjetaReg(it.r, it) : tarjetaOcc(it);
@@ -850,6 +861,41 @@ function colocar(bloques, alto = HORA_ALTO) {
   if (grupo.length) cerrar();
   return xs;
 }
+/* Junta en una "pila" lo que va seguido pero no cabe a su hora (p. ej. 17:00 y 17:30 con 26 px por hora):
+   se dibuja una cosa debajo de otra, a todo el ancho, empujando hacia abajo lo que no quepa.
+   Solo se queda aparte (y por tanto lado a lado) lo que coincide de verdad en el horario.
+   Lo que no tiene hora de fin cuenta como un instante para decidir si coincide. */
+const FILA_PILA = 18; // px de cada fila de una pila (una línea)
+function agrupar(bloques, alto) {
+  const minimo = 22 / alto * 60, fila = FILA_PILA / alto * 60;
+  const finReal = bl => bl.sinFin ? bl.a : bl.b;
+  const xs = [...bloques].sort((x, y) => x.a - y.a || y.b - x.b);
+  const out = [];
+  let g = null; // { filas: [{bl, a, b}], fin (dibujado), finReal, finSola (fin si se queda sola) }
+  const cerrar = () => {
+    if (!g) return;
+    if (g.filas.length === 1) out.push(g.filas[0].bl);
+    else out.push({ pila: g.filas, a: g.filas[0].a, b: g.fin });
+    g = null;
+  };
+  for (const bl of xs) {
+    if (g && g.filas.length === 1 && bl.a >= g.fin && bl.a < g.finSola && bl.a >= g.finReal) { g.fin = bl.a; g.filas[0].b = bl.a; } // la primera se estira hasta la siguiente
+    if (g && bl.a < (g.filas.length === 1 ? g.finSola : g.fin) && bl.a >= g.finReal) {
+      const a = Math.max(bl.a, g.fin), b = Math.max(a + Math.max(finReal(bl) - bl.a, 0), a + fila);
+      g.filas.push({ bl, a, b }); g.fin = b; g.finReal = Math.max(g.finReal, finReal(bl));
+      continue;
+    }
+    if (g && bl.a < (g.filas.length === 1 ? g.finSola : g.fin)) { out.push(bl); continue; } // coincide de verdad: va aparte, a su lado
+    cerrar();
+    // la primera fila: si luego se apila algo, ocupa solo una línea; si se queda sola, el mínimo normal
+    const b1 = Math.max(finReal(bl), bl.a + fila);
+    g = { filas: [{ bl, a: bl.a, b: b1 }], fin: b1, finReal: finReal(bl), finSola: Math.max(bl.b, bl.a + minimo) };
+  }
+  cerrar();
+  return out;
+}
+const conPos = (xs, x0, ancho) => xs.map(bl => ({ ...bl, x: x0 + bl.col / bl.ncol * ancho, w: ancho / bl.ncol }));
+
 /* Carril de cada cosa: 'ivan', 'jen' o 'ambos' (el turno de "alternar" ya viene resuelto) */
 const carrilDe = it => {
   const q = it.tipo === 'reg' ? it.r.hechaPor : quienDe(it.d);
@@ -865,7 +911,7 @@ function disponer(bloques, alto, dos) {
   const minimo = Math.round(22 / alto * 60);
   const fin = bl => Math.max(bl.b, bl.a + minimo);
   const solapan = (x, y) => x.a < fin(y) && y.a < fin(x);
-  if (!dos) return colocar(bloques, alto).map(bl => ({ ...bl, x: bl.col / bl.ncol, w: 1 / bl.ncol }));
+  if (!dos) return conPos(colocar(agrupar(bloques, alto), alto), 0, 1);
   const ambos = bloques.filter(bl => carrilDe(bl.it) === 'ambos');
   const solos = bloques.filter(bl => carrilDe(bl.it) !== 'ambos');
   const partir = new Set(ambos.filter(A => solos.some(x => solapan(A, x))));
@@ -873,10 +919,10 @@ function disponer(bloques, alto, dos) {
     cambio = false;
     for (const A of ambos) if (!partir.has(A) && [...partir].some(P => solapan(A, P))) { partir.add(A); cambio = true; }
   }
-  const res = colocar(ambos.filter(A => !partir.has(A)), alto).map(bl => ({ ...bl, x: bl.col / bl.ncol, w: 1 / bl.ncol }));
+  const res = conPos(colocar(agrupar(ambos.filter(A => !partir.has(A)), alto), alto), 0, 1);
   ['ivan', 'jen'].forEach((p, k) => {
     const carril = [...solos.filter(x => carrilDe(x.it) === p).map(x => ({ ...x })), ...[...partir].map(A => ({ ...A, trozo: true }))];
-    for (const bl of colocar(carril, alto)) res.push({ ...bl, x: k / 2 + bl.col / bl.ncol / 2, w: 1 / bl.ncol / 2 });
+    res.push(...conPos(colocar(agrupar(carril, alto), alto), k / 2, 1 / 2));
   });
   return res;
 }
@@ -900,10 +946,21 @@ function rejillaHoras(dias, mapa, h, { alto: HH = HORA_ALTO, cabecera = true } =
     `<span style="top:${(hh - primero) * HH}px">${pad(hh)}:00</span>`).join('');
   const columnas = dias.map((d, i) => {
     const limiteEstrecho = dias.length > 1 ? 0.5 : 0.3;
+    const titulo = it => { const x = horasDe(it); return esc(`${x.nombre}${horaTexto(x) ? ' · ' + horaTexto(x) : ''}`); };
     const bloques = disponer(porDia[i].bloques, HH, dos).map(bl => {
       const top = px(bl.a), altura = Math.max(bl.b - bl.a, 0) / 60 * HH;
+      const pos = `top:${top.toFixed(1)}px;left:calc(${(bl.x * 100).toFixed(3)}% + 2px);width:calc(${(bl.w * 100).toFixed(3)}% - 4px)`;
+      const estrecho = bl.w < limiteEstrecho - 1e-6 ? ' estrecho' : '';
+      if (bl.pila) {
+        const filas = bl.pila.map(f => {
+          const alto = (f.b - f.a) / 60 * HH;
+          const it = { ...f.bl.it, prefijo: horasDe(f.bl.it).horaInicio };
+          return `<div class="fila-pila${alto < 40 ? ' corto' : ''}" title="${titulo(f.bl.it)}" style="top:${((f.a - bl.a) / 60 * HH).toFixed(1)}px;height:${(alto - 2).toFixed(1)}px">${tarjeta(it)}</div>`;
+        }).join('');
+        return `<div class="bloque grupo${estrecho}" style="${pos};height:${altura.toFixed(1)}px">${filas}</div>`;
+      }
       const corto = altura < 40;
-      return `<div class="bloque${corto ? ' corto' : ''}${bl.w < limiteEstrecho - 1e-6 ? ' estrecho' : ''}${bl.trozo ? ' trozo' : ''}" style="top:${top.toFixed(1)}px;height:${(Math.max(altura, 22) - 2).toFixed(1)}px;left:calc(${(bl.x * 100).toFixed(3)}% + 2px);width:calc(${(bl.w * 100).toFixed(3)}% - 4px)">${tarjeta(bl.it)}</div>`;
+      return `<div class="bloque${corto ? ' corto' : ''}${estrecho}${bl.trozo ? ' trozo' : ''}" title="${titulo(bl.it)}" style="${pos};height:${(Math.max(altura, 22) - 2).toFixed(1)}px">${tarjeta(bl.it)}</div>`;
     }).join('');
     const linea = d === h ? `<div class="ahora" id="ahora" style="top:${px(minAhora).toFixed(1)}px"></div>` : '';
     return `<div class="rj-dia${dos ? ' dos' : ''}${d === h && dias.length > 1 ? ' es-hoy' : ''}">${bloques}${linea}</div>`;
@@ -920,10 +977,8 @@ function rejillaHoras(dias, mapa, h, { alto: HH = HORA_ALTO, cabecera = true } =
 function miniSemana(dias, mapa, h, elegido) {
   return `<div class="mini-semana" role="group" aria-label="Elegir día">${dias.map(d => {
     const { sinHora, bloques } = tramosDia(mapa[d] || [], mapa[sumarDias(d, -1)] || []);
-    const barras = disponer(bloques, 60, dosCarriles()).map(bl => {
-      const q = carrilDe(bl.it);
-      return `<i class="p-${q}${bl.it.tipo === 'reg' ? ' ok' : ''}" style="top:${(bl.a / 14.4).toFixed(2)}%;height:${Math.max((bl.b - bl.a) / 14.4, 4).toFixed(2)}%;left:${(bl.x * 100).toFixed(1)}%;width:${(bl.w * 100).toFixed(1)}%"></i>`;
-    }).join('');
+    const barra = (bl, x, w) => `<i class="p-${carrilDe(bl.it)}${bl.it.tipo === 'reg' ? ' ok' : ''}" style="top:${(bl.a / 14.4).toFixed(2)}%;height:${Math.max((bl.b - bl.a) / 14.4, 4).toFixed(2)}%;left:${(x * 100).toFixed(1)}%;width:${(w * 100).toFixed(1)}%"></i>`;
+    const barras = disponer(bloques, 60, dosCarriles()).map(bl => bl.pila ? bl.pila.map(f => barra(f.bl, bl.x, bl.w)).join('') : barra(bl, bl.x, bl.w)).join('');
     const puntos = sinHora.slice(0, 4).map(it => `<b class="p-${it.tipo === 'reg' ? it.r.hechaPor : quienDe(it.d)}${it.atrasada ? ' atr' : ''}"></b>`).join('') + (sinHora.length > 4 ? '<small>+</small>' : '');
     return `<button class="mini-dia${d === elegido ? ' sel' : ''}${d === h ? ' hoy' : ''}" data-elegir="${d}" aria-label="${fechaLarga(d)}" aria-pressed="${d === elegido}">
       <span class="md-n">${DIAS_CORTOS[diaSemana(d)]}</span><span class="md-num">${aFecha(d).getDate()}</span>
